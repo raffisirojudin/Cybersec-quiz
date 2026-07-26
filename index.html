@@ -1,0 +1,2251 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CELAH // Kuis Temukan Celah Keamanan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+  (function(){
+    try{
+      var saved = localStorage.getItem("cybersec_quiz_theme");
+      var theme = saved || (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+      document.documentElement.setAttribute("data-theme", theme);
+    }catch(e){
+      document.documentElement.setAttribute("data-theme", "dark");
+    }
+  })();
+</script>
+<style>
+  :root, html[data-theme="dark"]{
+    --bg-deep:#070b0a;
+    --bg-panel:#0d1513;
+    --bg-panel-alt:#111c19;
+    --bg-inset:#081210;
+    --neon:#3fe89b;
+    --neon-hover:#59f2ab;
+    --neon-dim:#2a9c6c;
+    --neon-glow: rgba(63,232,155,0.35);
+    --amber:#ffb454;
+    --red:#ff4d6d;
+    --red-glow: rgba(255,77,109,0.3);
+    --text:#dff5ec;
+    --text-muted:#5f8577;
+    --text-dim:#3c5850;
+    --border: rgba(63,232,155,0.16);
+    --border-strong: rgba(63,232,155,0.35);
+    --on-neon:#04140c;
+    --on-red:#1a0508;
+    --code-text:#b7f5d8;
+    --hint-text:#ffdcaa;
+    --fb-correct-text:#c9f7e2;
+    --fb-wrong-text:#ffd7de;
+    --fb-correct-bg: rgba(63,232,155,0.07);
+    --fb-wrong-bg: rgba(255,77,109,0.07);
+    --scanline-color: rgba(0,0,0,0.10);
+    --vignette-color: rgba(0,0,0,0.75);
+    --bg-glow-1: rgba(63,232,155,0.07);
+    --bg-glow-2: rgba(63,232,155,0.04);
+    --radius: 3px;
+    --mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+  }
+
+  html[data-theme="light"]{
+    --bg-deep:#f3f6f4;
+    --bg-panel:#ffffff;
+    --bg-panel-alt:#eef3f0;
+    --bg-inset:#eef4f1;
+    --neon:#0f8a56;
+    --neon-hover:#0c703f;
+    --neon-dim:#0c703f;
+    --neon-glow: rgba(15,138,86,0.22);
+    --amber:#a15d00;
+    --red:#c92f49;
+    --red-glow: rgba(201,47,73,0.2);
+    --text:#152420;
+    --text-muted:#54685f;
+    --text-dim:#8a9c93;
+    --border: rgba(15,138,86,0.22);
+    --border-strong: rgba(15,138,86,0.45);
+    --on-neon:#ffffff;
+    --on-red:#ffffff;
+    --code-text:#0c5536;
+    --hint-text:#7a3e00;
+    --fb-correct-text:#0c5536;
+    --fb-wrong-text:#7a1830;
+    --fb-correct-bg: rgba(15,138,86,0.08);
+    --fb-wrong-bg: rgba(201,47,73,0.07);
+    --scanline-color: rgba(0,0,0,0.035);
+    --vignette-color: rgba(30,40,35,0.08);
+    --bg-glow-1: rgba(15,138,86,0.05);
+    --bg-glow-2: rgba(15,138,86,0.03);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at 50% -10%, var(--bg-glow-1), transparent 60%),
+      radial-gradient(ellipse at 100% 100%, var(--bg-glow-2), transparent 50%),
+      var(--bg-deep);
+    color:var(--text);
+    font-family:var(--mono);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+    overflow-x:hidden;
+    transition:background-color .2s ease, color .2s ease;
+  }
+
+  .crt-overlay{
+    position:fixed; inset:0; pointer-events:none; z-index:50;
+    background:repeating-linear-gradient(
+      to bottom,
+      rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px,
+      var(--scanline-color) 3px, rgba(0,0,0,0) 4px
+    );
+    mix-blend-mode:overlay;
+    animation:flicker 6.5s infinite;
+  }
+  .vignette{ position:fixed; inset:0; pointer-events:none; z-index:49; box-shadow: inset 0 0 160px var(--vignette-color); }
+  @keyframes flicker{ 0%,96%,100%{opacity:1;} 97%{opacity:0.85;} 98%{opacity:1;} 99%{opacity:0.9;} }
+  @media (prefers-reduced-motion: reduce){ .crt-overlay{animation:none;} }
+
+  a{color:var(--neon);}
+  .wrap{ max-width:720px; margin:0 auto; padding:28px 18px 70px; position:relative; z-index:1; }
+
+  .topbar{ display:flex; align-items:center; justify-content:space-between; padding-bottom:20px; margin-bottom:22px; border-bottom:1px solid var(--border); }
+  .brand{ display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:0.06em; font-size:15px; }
+  .brand .dot{ width:9px; height:9px; border-radius:50%; background:var(--neon); box-shadow:0 0 8px 2px var(--neon-glow); flex-shrink:0; }
+  .brand small{ display:block; font-weight:400; color:var(--text-muted); font-size:10px; letter-spacing:0.08em; margin-top:2px; }
+  .topbar-actions{display:flex; gap:8px;}
+
+  button{font-family:var(--mono); cursor:pointer;}
+  .btn{ background:transparent; border:1px solid var(--border-strong); color:var(--neon); padding:10px 18px; font-size:12px; letter-spacing:0.08em; text-transform:uppercase; font-weight:600; border-radius:var(--radius); transition:background .15s ease, box-shadow .15s ease, transform .05s ease; }
+  .btn:hover{background:rgba(63,232,155,0.08); box-shadow:0 0 0 1px var(--border-strong), 0 0 16px var(--neon-glow);}
+  .btn:active{transform:translateY(1px);}
+  .btn:focus-visible{outline:2px solid var(--neon); outline-offset:2px;}
+  .btn-primary{ background:var(--neon); color:var(--on-neon); border-color:var(--neon); }
+  .btn-primary:hover{background:var(--neon-hover); box-shadow:0 0 22px var(--neon-glow);}
+  .btn-icon{ padding:10px 12px; font-size:14px; line-height:1; }
+  .btn-ghost{border-color:var(--border); color:var(--text-muted);}
+  .btn-ghost:hover{color:var(--text); background:rgba(255,255,255,0.03);}
+  .btn-amber{border-color:rgba(255,180,84,0.5); color:var(--amber);}
+  .btn-amber:hover{background:rgba(255,180,84,0.1); box-shadow:0 0 16px rgba(255,180,84,0.25);}
+  .btn-block{width:100%; text-align:center;}
+  .btn-lg{padding:14px 22px; font-size:13px;}
+  .btn-sm{padding:7px 12px; font-size:10.5px;}
+
+  .panel{ background:var(--bg-panel); border:1px solid var(--border); border-radius:6px; overflow:hidden; margin-bottom:18px; }
+  .panel-head{ display:flex; align-items:center; gap:8px; padding:9px 14px; background:var(--bg-panel-alt); border-bottom:1px solid var(--border); }
+  .panel-head .tdot{width:8px; height:8px; border-radius:50%; background:var(--text-dim);}
+  .panel-head .label{ margin-left:6px; font-size:10px; letter-spacing:0.08em; color:var(--text-muted); text-transform:uppercase; }
+  .panel-body{padding:20px;}
+
+  .eyebrow{ font-size:10.5px; letter-spacing:0.14em; color:var(--neon-dim); text-transform:uppercase; font-weight:700; display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .eyebrow::before{content:"//"; color:var(--text-dim);}
+
+  h1{font-size:26px; margin:0 0 10px; letter-spacing:0.01em; line-height:1.25;}
+  h2{font-size:18px; margin:0 0 6px;}
+  p{color:var(--text-muted); line-height:1.65; font-size:13.5px; margin:0 0 14px;}
+  .glow-text{ text-shadow:0 0 18px var(--neon-glow); }
+
+  .screen{display:none;}
+  .screen.active{display:block; animation:fadeIn .35s ease;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  #boot{ font-size:12.5px; line-height:1.9; color:var(--neon-dim); min-height:150px; white-space:pre-wrap; }
+  #boot .cursor{display:inline-block; width:7px; height:13px; background:var(--neon); margin-left:2px; animation:blink 1s step-end infinite; vertical-align:-2px;}
+  @keyframes blink{0%,50%{opacity:1;} 51%,100%{opacity:0;}}
+
+  .stat-row{display:flex; gap:12px; margin:18px 0 4px; flex-wrap:wrap;}
+  .stat-box{ flex:1; min-width:120px; background:var(--bg-inset); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px; }
+  .stat-box .stat-label{font-size:10px; color:var(--text-dim); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:6px;}
+  .stat-box .stat-value{font-size:20px; font-weight:800; color:var(--neon);}
+  .stat-box .stat-value.muted{color:var(--text-muted); font-size:14px; font-weight:600;}
+
+  /* --- Mode select --- */
+  .mode-select{display:flex; gap:10px; margin:18px 0 6px; flex-wrap:wrap;}
+  .mode-card{
+    flex:1; min-width:210px; text-align:left; cursor:pointer;
+    background:var(--bg-inset); border:1px solid var(--border); border-radius:var(--radius);
+    padding:14px; transition:border-color .15s ease, background .15s ease;
+  }
+  .mode-card:hover{border-color:var(--border-strong);}
+  .mode-card.active{border-color:var(--neon); background:rgba(63,232,155,0.07); box-shadow:0 0 0 1px var(--border-strong);}
+  .mode-card .mode-title{color:var(--text); font-weight:700; font-size:13px; margin-bottom:5px; display:flex; align-items:center; gap:7px;}
+  .mode-card .mode-radio{width:13px; height:13px; border-radius:50%; border:1px solid var(--border-strong); flex-shrink:0; position:relative;}
+  .mode-card.active .mode-radio::after{content:""; position:absolute; inset:2px; border-radius:50%; background:var(--neon);}
+  .mode-card .mode-desc{font-size:11.5px; line-height:1.55; color:var(--text-muted); margin-left:20px;}
+  #jtCounterLabel{display:block; margin-top:6px; color:var(--amber); font-size:10.5px; letter-spacing:0.04em;}
+
+  .jalur-select{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:16px 0 4px;}
+  .jalur-label{font-size:10.5px; color:var(--text-dim); letter-spacing:0.05em; text-transform:uppercase; margin-right:2px;}
+  .jalur-chip{
+    font-size:10.5px; padding:5px 12px; border-radius:20px; border:1px solid var(--border);
+    background:transparent; color:var(--text-muted); cursor:pointer; letter-spacing:0.03em; font-family:var(--mono);
+  }
+  .jalur-chip:hover{border-color:var(--border-strong);}
+  .jalur-chip.active{border-color:var(--neon); color:var(--neon); background:rgba(63,232,155,0.08);}
+
+  table{width:100%; border-collapse:collapse; font-size:12.5px;}
+  th{ text-align:left; color:var(--text-dim); font-weight:600; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; padding:0 8px 8px; border-bottom:1px solid var(--border); }
+  td{padding:9px 8px; border-bottom:1px solid rgba(255,255,255,0.03); color:var(--text);}
+  tr:last-child td{border-bottom:none;}
+  .rank-medal{width:22px; display:inline-block; text-align:center;}
+  .mode-pill{font-size:9.5px; color:var(--text-dim); letter-spacing:0.04em;}
+
+  .progress-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:8px;}
+  .progress-label{font-size:11px; letter-spacing:0.08em; color:var(--text-muted); text-transform:uppercase;}
+  .progress-dots{display:flex; gap:5px; flex-wrap:wrap;}
+  .pdot{width:9px; height:9px; border-radius:2px; background:var(--bg-inset); border:1px solid var(--border);}
+  .pdot.done-correct{background:var(--neon); border-color:var(--neon);}
+  .pdot.done-wrong{background:var(--red); border-color:var(--red);}
+  .pdot.current{border-color:var(--neon); box-shadow:0 0 6px var(--neon-glow);}
+
+  .timer-track{ height:5px; background:var(--bg-inset); border-radius:3px; overflow:hidden; margin-bottom:10px; border:1px solid var(--border); }
+  .timer-fill{ height:100%; width:100%; background:var(--neon); transition:width 1s linear, background .3s ease; }
+  .timer-fill.warn{background:var(--amber);}
+  .timer-fill.danger{background:var(--red);}
+  .timer-caption{font-size:10px; color:var(--text-dim); letter-spacing:0.05em; margin-bottom:18px; display:block;}
+  .belajar-flag{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    font-size:10.5px; color:var(--text-dim); letter-spacing:0.05em; text-transform:uppercase;
+    margin-bottom:18px; padding:8px 10px; background:var(--bg-inset); border:1px solid var(--border); border-radius:var(--radius);
+  }
+
+  .q-tags{display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap;}
+  .q-type-tag{ display:inline-block; font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; padding:3px 8px; border-radius:20px; font-weight:700; }
+  .q-type-tag.theory{background:rgba(63,232,155,0.12); color:var(--neon);}
+  .q-type-tag.code{background:rgba(255,180,84,0.14); color:var(--amber);}
+  .q-diff-tag{ display:inline-block; font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; padding:2px 8px; border-radius:20px; font-weight:700; background:transparent; border:1px solid var(--border); color:var(--text-muted); }
+  .q-diff-tag.menengah{border-color:rgba(255,180,84,0.4); color:var(--amber);}
+  .q-diff-tag.lanjutan{border-color:rgba(255,77,109,0.4); color:var(--red);}
+  .q-diff-tag.dasar{border-color:rgba(63,232,155,0.4); color:var(--neon);}
+
+  .q-text{font-size:15.5px; color:var(--text); line-height:1.55; margin-bottom:16px; font-weight:600;}
+
+  .code-block{ background:var(--bg-inset); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:18px; overflow:hidden; }
+  .code-block .cb-head{ display:flex; align-items:center; gap:6px; padding:7px 12px; background:rgba(255,180,84,0.06); border-bottom:1px solid var(--border); font-size:10px; color:var(--amber); letter-spacing:0.05em; }
+  .code-block pre{ margin:0; padding:14px 16px; font-size:12.5px; line-height:1.7; color:var(--code-text); overflow-x:auto; white-space:pre; }
+
+  /* --- Jam Terbang: stage track --- */
+  .practice-stage-track{display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap;}
+  .pstage-pill{
+    font-size:10px; letter-spacing:0.05em; text-transform:uppercase; font-weight:700;
+    padding:4px 10px; border-radius:20px; border:1px solid var(--border); color:var(--text-dim);
+  }
+  .pstage-pill.active{border-color:var(--border-strong); color:var(--amber); background:rgba(255,180,84,0.08);}
+  .pstage-pill.done{border-color:var(--border-strong); color:var(--neon); background:rgba(63,232,155,0.08);}
+
+  /* --- Jam Terbang: klik baris kode --- */
+  .code-lines{padding:6px 0;}
+  .code-line{
+    display:flex; gap:12px; width:100%; text-align:left; background:none; border:none;
+    padding:5px 16px; font-family:var(--mono); font-size:12.5px; line-height:1.7; color:var(--code-text);
+    cursor:pointer; border-left:3px solid transparent;
+  }
+  .code-line:hover:not(:disabled){background:rgba(255,180,84,0.06); border-left-color:rgba(255,180,84,0.4);}
+  .code-line:focus-visible{outline:2px solid var(--amber); outline-offset:-2px;}
+  .code-line .cl-num{flex-shrink:0; width:18px; color:var(--text-dim); user-select:none;}
+  .code-line .cl-text{white-space:pre-wrap; word-break:break-word;}
+  .code-line.correct{background:rgba(63,232,155,0.12); border-left-color:var(--neon);}
+  .code-line.correct .cl-num{color:var(--neon);}
+  .code-line.wrong{background:rgba(255,77,109,0.12); border-left-color:var(--red);}
+  .code-line.wrong .cl-num{color:var(--red);}
+  .code-line:disabled{cursor:default;}
+  .code-line:disabled:not(.correct):not(.wrong){opacity:0.55;}
+
+  /* --- Jam Terbang: opsi kode perbaikan --- */
+  .option.fix-option{flex-direction:column; align-items:stretch; gap:6px;}
+  .fix-option .fix-option-label{display:flex; align-items:center; gap:10px;}
+  .fix-option pre{margin:6px 0 0 32px; font-size:11.5px; line-height:1.6; color:var(--code-text); white-space:pre-wrap; word-break:break-word;}
+
+  .attacker-note{
+    margin-top:14px; padding:11px 13px; border-radius:var(--radius);
+    background:rgba(255,77,109,0.05); border:1px solid rgba(255,77,109,0.25);
+    font-size:11.5px; line-height:1.6; color:var(--text-muted);
+  }
+  .attacker-note .an-label{display:block; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; font-size:10px; color:var(--red); margin-bottom:4px;}
+
+  /* --- Jam Terbang: simulasi serangan --- */
+  .sim-panel{margin-top:12px; padding-top:12px; border-top:1px dashed var(--border);}
+  .sim-payload-row{margin-bottom:10px; font-size:11.5px; color:var(--text-muted);}
+  .sim-payload-row code{display:block; margin-top:5px; padding:8px 10px; background:var(--bg-inset); border:1px solid var(--border); border-radius:var(--radius); color:var(--amber); font-size:11.5px; word-break:break-word; white-space:pre-wrap;}
+  .sim-outcome{padding:10px 12px; border-radius:var(--radius); margin-bottom:8px; font-size:11.5px; line-height:1.6; border:1px solid var(--border);}
+  .sim-outcome:last-child{margin-bottom:0;}
+  .sim-outcome.sim-before{background:var(--fb-wrong-bg); border-color:rgba(255,77,109,0.3); color:var(--fb-wrong-text);}
+  .sim-outcome.sim-after{background:var(--fb-correct-bg); border-color:var(--border-strong); color:var(--fb-correct-text);}
+  .sim-outcome .sim-tag{display:block; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; font-size:10px; margin-bottom:4px;}
+
+  .hint-row{margin-bottom:16px;}
+  .hint-box{
+    display:none; margin-top:10px; padding:10px 12px; border-radius:var(--radius);
+    background:rgba(255,180,84,0.06); border:1px solid rgba(255,180,84,0.3);
+    font-size:12px; color:var(--hint-text); line-height:1.6;
+  }
+  .hint-box.show{display:block; animation:fadeIn .2s ease;}
+  .hint-box .hint-label{font-weight:800; color:var(--amber); letter-spacing:0.05em; text-transform:uppercase; font-size:10px; display:block; margin-bottom:4px;}
+
+  .options{display:flex; flex-direction:column; gap:9px;}
+  .option{ display:flex; align-items:center; gap:12px; background:var(--bg-inset); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px; text-align:left; color:var(--text); font-size:13px; transition:border-color .12s ease, background .12s ease; }
+  .option:hover:not(:disabled){border-color:var(--border-strong); background:rgba(63,232,155,0.05);}
+  .option:focus-visible{outline:2px solid var(--neon); outline-offset:2px;}
+  .option .opt-key{ flex-shrink:0; width:22px; height:22px; border-radius:4px; border:1px solid var(--border-strong); color:var(--neon-dim); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; }
+  .option.correct{border-color:var(--neon); background:rgba(63,232,155,0.12);}
+  .option.correct .opt-key{background:var(--neon); color:var(--on-neon); border-color:var(--neon);}
+  .option.wrong{border-color:var(--red); background:rgba(255,77,109,0.1);}
+  .option.wrong .opt-key{background:var(--red); color:var(--on-red); border-color:var(--red);}
+  .option:disabled{cursor:default;}
+  .option:disabled:not(.correct):not(.wrong){opacity:0.45;}
+
+  .feedback{ margin-top:16px; padding:14px 15px; border-radius:var(--radius); font-size:12.5px; line-height:1.6; display:none; border:1px solid var(--border); }
+  .feedback.show{display:block; animation:fadeIn .25s ease;}
+  .feedback.correct{border-color:var(--border-strong); background:var(--fb-correct-bg); color:var(--fb-correct-text);}
+  .feedback.wrong{border-color:rgba(255,77,109,0.35); background:var(--fb-wrong-bg); color:var(--fb-wrong-text);}
+  .feedback .fb-tag{font-weight:800; letter-spacing:0.06em; text-transform:uppercase; font-size:11px; display:block; margin-bottom:9px;}
+  .feedback.correct .fb-tag{color:var(--neon);}
+  .feedback.wrong .fb-tag{color:var(--red);}
+  .feedback .fb-block{margin-bottom:9px;}
+  .feedback .fb-block:last-child{margin-bottom:0;}
+  .feedback .fb-block b{color:var(--text); display:block; font-size:10.5px; letter-spacing:0.05em; text-transform:uppercase; margin-bottom:3px; opacity:0.85;}
+
+  .quiz-footer{display:flex; justify-content:flex-end; margin-top:18px;}
+
+  .cert{ text-align:center; padding:30px 20px 26px; border:1px solid var(--border-strong); border-radius:6px; background: radial-gradient(ellipse at 50% 0%, rgba(63,232,155,0.09), transparent 65%), var(--bg-panel); position:relative; margin-bottom:20px; }
+  .cert::before, .cert::after{ content:"◆"; position:absolute; top:10px; color:var(--text-dim); font-size:10px; }
+  .cert::before{left:12px;} .cert::after{right:12px;}
+  .cert .cert-eyebrow{font-size:10px; letter-spacing:0.18em; color:var(--text-muted); text-transform:uppercase; margin-bottom:14px;}
+  .cert .cert-score{font-size:44px; font-weight:800; color:var(--neon); line-height:1; text-shadow:0 0 24px var(--neon-glow);}
+  .cert .cert-score span{font-size:16px; color:var(--text-dim); font-weight:600;}
+  .cert .cert-rank{margin-top:14px; font-size:15px; font-weight:800; letter-spacing:0.04em; color:var(--text);}
+  .cert .cert-status{ display:inline-block; margin-top:10px; padding:4px 12px; border-radius:20px; font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; font-weight:700; }
+  .cert .cert-status.pass{background:rgba(63,232,155,0.14); color:var(--neon);}
+  .cert .cert-status.fail{background:rgba(255,77,109,0.14); color:var(--red);}
+  .cert .cert-newrecord{margin-top:12px; font-size:11px; color:var(--amber); letter-spacing:0.06em;}
+  .cert .cert-note{margin-top:10px; font-size:10.5px; color:var(--text-dim); letter-spacing:0.04em;}
+
+  .result-actions{display:flex; gap:10px; margin-bottom:22px; flex-wrap:wrap;}
+  .result-actions .btn{flex:1;}
+
+  .review-item{border-bottom:1px solid var(--border); padding:14px 0;}
+  .review-item:last-child{border-bottom:none;}
+  .review-head{
+    display:flex; align-items:center; gap:8px; width:100%;
+    background:none; border:none; padding:0; margin-bottom:0; font-family:inherit;
+    color:inherit; text-align:left; cursor:pointer;
+  }
+  .review-head:hover .review-q{color:var(--neon);}
+  .review-head:focus-visible{outline:2px solid var(--neon); outline-offset:2px;}
+  .review-chevron{margin-left:auto; flex-shrink:0; color:var(--text-dim); font-size:10px; transition:transform .15s ease;}
+  .review-badge{ width:18px; height:18px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; }
+  .review-badge.correct{background:var(--neon); color:var(--on-neon);}
+  .review-badge.wrong{background:var(--red); color:var(--on-red);}
+  .review-q{font-size:12.5px; color:var(--text); font-weight:600;}
+  .review-detail{font-size:11.5px; color:var(--text-muted); line-height:1.6; margin-left:26px; margin-top:8px; display:none;}
+  .review-detail.expanded{display:block;}
+  .review-detail .your-ans{color:var(--red);}
+  .review-detail .correct-ans{color:var(--neon);}
+  .review-detail .rd-label{color:var(--text); font-weight:700; opacity:0.8;}
+
+  .modal-backdrop{ display:none; position:fixed; inset:0; background:rgba(4,8,7,0.8); z-index:60; align-items:center; justify-content:center; padding:18px; backdrop-filter:blur(2px); }
+  .modal-backdrop.show{display:flex;}
+  .modal{ width:100%; max-width:520px; max-height:82vh; overflow-y:auto; background:var(--bg-panel); border:1px solid var(--border-strong); border-radius:6px; }
+  .modal-head{ display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--bg-panel); }
+  .modal-head h2{margin:0; font-size:14px; letter-spacing:0.04em;}
+  .modal-close{background:none; border:none; color:var(--text-muted); font-size:18px; line-height:1; padding:4px;}
+  .modal-close:hover{color:var(--text);}
+  .tabs{display:flex; gap:4px; padding:14px 18px 0;}
+  .tab-btn{ background:none; border:1px solid var(--border); color:var(--text-muted); font-size:10.5px; letter-spacing:0.05em; text-transform:uppercase; padding:7px 10px; border-radius:20px; }
+  .tab-btn.active{border-color:var(--border-strong); color:var(--neon); background:rgba(63,232,155,0.08);}
+  .tab-panel{display:none; padding:16px 18px 20px;}
+  .tab-panel.active{display:block;}
+  .tab-panel ol, .tab-panel ul{margin:0; padding-left:18px; color:var(--text-muted); font-size:12.5px; line-height:1.9;}
+  .tab-panel li{margin-bottom:4px;}
+  .tab-panel li strong{color:var(--text);}
+
+  .glossary-item{border-bottom:1px solid var(--border); padding:12px 0;}
+  .glossary-item:first-child{padding-top:0;}
+  .glossary-item:last-child{border-bottom:none; padding-bottom:0;}
+  .glossary-term{font-weight:800; color:var(--text); font-size:13px; margin-bottom:7px;}
+  .glossary-item p{margin:0 0 6px; font-size:11.5px; line-height:1.65; color:var(--text-muted);}
+  .glossary-item p:last-child{margin-bottom:0;}
+  .glossary-item p strong{color:var(--text);}
+
+  footer{ text-align:center; margin-top:30px; font-size:10.5px; color:var(--text-dim); letter-spacing:0.05em; }
+
+  @media (max-width:480px){
+    h1{font-size:21px;}
+    .cert .cert-score{font-size:36px;}
+    .stat-row{gap:8px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="crt-overlay"></div>
+<div class="vignette"></div>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <span class="dot"></span>
+      <div>CELAH<small>Kuis Temukan Celah Keamanan</small></div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-icon" id="btnTheme" type="button" aria-label="Ganti tema terang/gelap">🌙</button>
+      <button class="btn btn-ghost" id="btnGuide" type="button">Panduan</button>
+    </div>
+  </div>
+
+  <!-- ============ SCREEN 1: START ============ -->
+  <section class="screen active" id="screen-start">
+    <div class="panel">
+      <div class="panel-head">
+        <span class="tdot" style="background:var(--red)"></span>
+        <span class="tdot" style="background:var(--amber)"></span>
+        <span class="tdot" style="background:var(--neon)"></span>
+        <span class="label">audit_keamanan.sh</span>
+      </div>
+      <div class="panel-body">
+        <div id="boot"></div>
+
+        <div id="startContent" style="display:none;">
+          <div class="eyebrow">Tantangan Keamanan Siber</div>
+          <h1 class="glow-text">Temukan celahnya sebelum penyerang menemukannya.</h1>
+          <p>Uji dan latih pemahamanmu soal keamanan siber lewat soal teori dan potongan kode nyata yang mengandung kerentanan — mulai dari konsep dasar sampai kasus yang lebih rumit.</p>
+
+          <div class="mode-select" id="modeSelect">
+            <button class="mode-card active" data-mode="belajar" type="button">
+              <div class="mode-title"><span class="mode-radio"></span>Mode Belajar</div>
+              <div class="mode-desc">Tanpa batas waktu, ada tombol petunjuk, dan penjelasan lengkap setiap soal. Direkomendasikan untuk pemula.</div>
+            </button>
+            <button class="mode-card" data-mode="tantangan" type="button">
+              <div class="mode-title"><span class="mode-radio"></span>Mode Tantangan</div>
+              <div class="mode-desc">Ada batas waktu per soal (menyesuaikan tingkat kesulitan). Cocok setelah kamu sudah paham materinya.</div>
+            </button>
+            <button class="mode-card" data-mode="jamterbang" type="button">
+              <div class="mode-title"><span class="mode-radio"></span>🛫 Mode Jam Terbang</div>
+              <div class="mode-desc">Latihan praktik: temukan baris kode yang rentan, kenali cara penyerang menemukannya, lalu pilih perbaikan yang tepat. Tanpa timer — fokus membangun insting code review.<span id="jtCounterLabel"></span></div>
+            </button>
+          </div>
+
+          <div class="jalur-select" id="jalurSelect">
+            <span class="jalur-label">Jalur Belajar:</span>
+            <button class="jalur-chip active" data-jalur="lengkap" type="button">Lengkap</button>
+            <button class="jalur-chip" data-jalur="dasar" type="button">Fondasi</button>
+            <button class="jalur-chip" data-jalur="menengah" type="button">Menengah</button>
+            <button class="jalur-chip" data-jalur="lanjutan" type="button">Lanjutan</button>
+          </div>
+
+          <div class="stat-row">
+            <div class="stat-box">
+              <div class="stat-label">Skor tertinggi</div>
+              <div class="stat-value" id="statHighScore">—</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Percobaan terakhir</div>
+              <div class="stat-value muted" id="statLastScore">Belum ada</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Jumlah soal</div>
+              <div class="stat-value muted" id="statTotalQ">—</div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap;">
+            <button class="btn btn-primary btn-lg" id="btnStart" type="button" style="flex:2; min-width:180px;">▶ Mulai Kuis</button>
+            <button class="btn btn-ghost" id="btnResetScore" type="button" style="flex:1; min-width:140px;">Reset Skor Tertinggi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="leaderboardPanel" style="display:none;">
+      <div class="panel-head">
+        <span class="tdot"></span><span class="tdot"></span><span class="tdot"></span>
+        <span class="label">papan_skor.log</span>
+      </div>
+      <div class="panel-body">
+        <div class="eyebrow">Daftar High Score</div>
+        <div id="leaderboardBody"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 2: QUIZ ============ -->
+  <section class="screen" id="screen-quiz">
+    <div class="panel">
+      <div class="panel-head">
+        <span class="tdot" style="background:var(--red)"></span>
+        <span class="tdot" style="background:var(--amber)"></span>
+        <span class="tdot" style="background:var(--neon)"></span>
+        <span class="label">scanning_target.sh — sesi_aktif</span>
+      </div>
+      <div class="panel-body">
+
+        <div class="progress-head">
+          <span class="progress-label" id="progressLabel">Soal 1 / 30</span>
+          <div class="progress-dots" id="progressDots"></div>
+        </div>
+
+        <div id="timerZone">
+          <div class="timer-track"><div class="timer-fill" id="timerFill"></div></div>
+          <span class="timer-caption" id="timerCaption"></span>
+        </div>
+        <div class="belajar-flag" id="belajarFlag" style="display:none;">
+          <span>Mode Belajar — tanpa batas waktu</span>
+          <button class="btn btn-ghost btn-sm" id="btnHint" type="button">💡 Petunjuk</button>
+        </div>
+
+        <div class="q-tags">
+          <span class="q-type-tag" id="qTypeTag">Teori</span>
+          <span class="q-diff-tag" id="qDiffTag">Dasar</span>
+        </div>
+        <div class="q-text" id="qText"></div>
+
+        <div class="code-block" id="qCodeBlock" style="display:none;">
+          <div class="cb-head">📄 <span id="qCodeLabel">potongan_kode.js</span></div>
+          <pre id="qCode"></pre>
+        </div>
+
+        <div class="hint-box" id="hintBox">
+          <span class="hint-label">Petunjuk</span>
+          <span id="hintText"></span>
+        </div>
+
+        <div class="options" id="qOptions"></div>
+
+        <div class="feedback" id="qFeedback">
+          <span class="fb-tag" id="fbTag"></span>
+          <div class="fb-block"><b>Kenapa begini</b><span id="fbWhy"></span></div>
+          <div class="fb-block"><b>Yang perlu diingat</b><span id="fbTakeaway"></span></div>
+        </div>
+
+        <div class="quiz-footer">
+          <button class="btn btn-primary" id="btnNext" type="button" style="display:none;">Lanjut →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 2.5: STAGE CHECKPOINT ============ -->
+  <section class="screen" id="screen-stage">
+    <div class="cert" style="padding:24px 20px 22px;">
+      <div class="cert-eyebrow" id="stageEyebrow">Checkpoint</div>
+      <div class="cert-score"><span id="stageScoreCorrect">0</span><span> / <span id="stageScoreTotal">0</span> benar</span></div>
+      <div class="cert-note" style="display:block;">Masih ada <span id="stageRemaining">0</span> soal lagi. Boleh lanjut sekarang, atau istirahat dulu dan lanjutkan nanti.</div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn btn-primary" id="btnStageContinue" type="button">Lanjut ke Soal Berikutnya →</button>
+      <button class="btn btn-ghost" id="btnStageStop" type="button">Berhenti Sampai Sini</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <span class="tdot"></span><span class="tdot"></span><span class="tdot"></span>
+        <span class="label">checkpoint_report.log</span>
+      </div>
+      <div class="panel-body" id="stageReviewBody"></div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 3: RESULT ============ -->
+  <section class="screen" id="screen-result">
+    <div class="cert">
+      <div class="cert-eyebrow" id="certEyebrow">Laporan Audit Selesai</div>
+      <div class="cert-score"><span id="resScoreCorrect">0</span><span> / <span id="resScoreTotal">0</span> benar</span></div>
+      <div class="cert-rank" id="resRank">—</div>
+      <span class="cert-status" id="resStatus">—</span>
+      <div class="cert-newrecord" id="resNewRecord" style="display:none;">★ REKOR BARU TERSIMPAN</div>
+      <div class="cert-note" id="resSessionNote" style="display:none;">Sesi latihan ulang — tidak memengaruhi papan skor</div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn btn-amber" id="btnRetryMissed" type="button" style="display:none; flex-basis:100%;">↻ Latihan Ulang yang Salah</button>
+      <button class="btn btn-primary" id="btnRetry" type="button">↻ Coba Lagi</button>
+      <button class="btn btn-ghost" id="btnHome" type="button">Kembali ke Beranda</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <span class="tdot"></span><span class="tdot"></span><span class="tdot"></span>
+        <span class="label">review_jawaban.log</span>
+      </div>
+      <div class="panel-body" id="reviewBody"></div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 4: JAM TERBANG (PRAKTIK) ============ -->
+  <section class="screen" id="screen-practice">
+    <div class="panel">
+      <div class="panel-head">
+        <span class="tdot" style="background:var(--red)"></span>
+        <span class="tdot" style="background:var(--amber)"></span>
+        <span class="tdot" style="background:var(--neon)"></span>
+        <span class="label" id="practiceLabel">jam_terbang.sh</span>
+      </div>
+      <div class="panel-body">
+
+        <div class="progress-head">
+          <span class="progress-label" id="practiceProgressLabel">Latihan 1 / 10</span>
+          <div class="progress-dots" id="practiceProgressDots"></div>
+        </div>
+
+        <div class="practice-stage-track">
+          <span class="pstage-pill" id="pstagePill0">1. Temukan</span>
+          <span class="pstage-pill" id="pstagePill1">2. Diagnosis</span>
+          <span class="pstage-pill" id="pstagePill2">3. Perbaiki</span>
+        </div>
+
+        <div class="q-tags">
+          <span class="q-type-tag code">Kode</span>
+          <span class="q-diff-tag" id="practiceCategoryTag">—</span>
+        </div>
+
+        <div id="practiceStageBody"></div>
+
+        <div class="quiz-footer">
+          <button class="btn btn-primary" id="btnPracticeNext" type="button" style="display:none;">Lanjut →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 5: HASIL JAM TERBANG ============ -->
+  <section class="screen" id="screen-practice-result">
+    <div class="cert">
+      <div class="cert-eyebrow">Laporan Jam Terbang</div>
+      <div class="cert-score"><span id="ptResScoreCorrect">0</span><span> / <span id="ptResScoreTotal">0</span> langkah benar</span></div>
+      <div class="cert-rank" id="ptResRank">—</div>
+      <span class="cert-status" id="ptResStatus">—</span>
+      <div class="cert-note" style="display:block;">Mode latihan praktik — tidak memengaruhi papan skor utama.</div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn btn-primary" id="btnPracticeRetry" type="button">↻ Latihan Lagi</button>
+      <button class="btn btn-ghost" id="btnPracticeHome" type="button">Kembali ke Beranda</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <span class="tdot"></span><span class="tdot"></span><span class="tdot"></span>
+        <span class="label">jam_terbang_review.log</span>
+      </div>
+      <div class="panel-body" id="practiceReviewBody"></div>
+    </div>
+  </section>
+
+  <footer>KUIS TEMUKAN CELAH — LATIHAN KESADARAN KEAMANAN SIBER, BUKAN ALAT PRODUKSI</footer>
+</div>
+
+<!-- ============ MODAL: PANDUAN ============ -->
+<div class="modal-backdrop" id="guideModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Instruksi &amp; Panduan</h2>
+      <button class="modal-close" id="btnCloseGuide" type="button" aria-label="Tutup">✕</button>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="cara">Cara Bermain</button>
+      <button class="tab-btn" data-tab="contoh">Contoh Soal</button>
+      <button class="tab-btn" data-tab="tips">Tips Keamanan</button>
+      <button class="tab-btn" data-tab="kamus">Kamus Ancaman</button>
+      <button class="tab-btn" data-tab="sumber">Sumber Belajar</button>
+    </div>
+
+    <div class="tab-panel active" data-panel="cara">
+      <ol>
+        <li>Ada <strong>30 soal</strong> berupa teori keamanan siber atau potongan kode yang mengandung celah, diurutkan dari tingkat Dasar → Menengah → Lanjutan. Sebelum mulai, kamu juga bisa pilih <strong>Jalur Belajar</strong> — Lengkap (semua 30 soal), atau fokus ke satu tingkat saja (Fondasi/Menengah/Lanjutan) kalau mau latihan lebih terarah.</li>
+        <li>Pilih <strong>Mode Belajar</strong> (tanpa batas waktu, ada tombol Petunjuk) jika kamu baru mulai — fokus memahami, bukan mengejar waktu. Pilih <strong>Mode Tantangan</strong> kalau ingin diuji dengan batas waktu per soal. Pilih <strong>Mode Jam Terbang</strong> kalau ingin latihan praktik langsung: menemukan baris kode rentan, mendiagnosis jenisnya, lalu memilih perbaikan yang tepat — tanpa timer.</li>
+        <li>Setiap jawaban langsung ditandai <strong>hijau (benar)</strong> atau <strong>merah (salah)</strong>, disertai penjelasan "Kenapa begini" dan "Yang perlu diingat" — bagian ini yang paling penting untuk dipelajari, bukan sekadar skornya.</li>
+        <li>Di akhir kuis kamu mendapat skor akhir, tingkat (rank), dan bisa membaca ulang semua penjelasan di bagian Review.</li>
+        <li>Skor tertinggimu tersimpan otomatis di perangkat ini.</li>
+      </ol>
+    </div>
+
+    <div class="tab-panel" data-panel="contoh">
+      <p style="margin-bottom:10px;">Begini bentuk soal kode yang akan kamu temui:</p>
+      <div class="q-type-tag code">Kode</div>
+      <div class="q-text" style="font-size:13.5px;">Apa kerentanan utama pada potongan kode berikut?</div>
+      <div class="code-block">
+        <div class="cb-head">📄 contoh.php</div>
+        <pre>$query = "SELECT * FROM users WHERE id = " . $_GET['id'];
+mysqli_query($conn, $query);</pre>
+      </div>
+      <p style="margin-top:10px; font-size:11.5px;"><strong style="color:var(--text)">Kenapa begini:</strong> input dari <code>$_GET['id']</code> digabung langsung ke query SQL tanpa prepared statement — inilah celah <strong style="color:var(--text)">SQL Injection</strong>.<br><br><strong style="color:var(--text)">Yang perlu diingat:</strong> selalu gunakan parameterized query / prepared statement, jangan pernah menggabung input pengguna langsung ke dalam query.</p>
+    </div>
+
+    <div class="tab-panel" data-panel="tips">
+      <ul>
+        <li><strong>Gunakan prepared statement / parameterized query</strong>, jangan gabungkan input langsung ke query database.</li>
+        <li><strong>Sanitasi & escape output</strong> sebelum dirender ke HTML untuk mencegah XSS.</li>
+        <li><strong>Jangan hardcode</strong> API key, password, atau secret di source code.</li>
+        <li><strong>Hash password</strong> dengan bcrypt/Argon2 + salt, hindari MD5/SHA1 mentah.</li>
+        <li><strong>Aktifkan 2FA</strong> dan terapkan prinsip least privilege pada setiap akun/servis.</li>
+        <li><strong>Validasi & batasi origin CORS</strong>, jangan gunakan wildcard bersama credentials.</li>
+        <li><strong>Verifikasi otorisasi di server</strong> untuk setiap objek yang diakses, jangan hanya mengandalkan ID yang sulit ditebak.</li>
+      </ul>
+    </div>
+
+    <div class="tab-panel" data-panel="kamus">
+      <p style="margin:0 0 12px; font-size:11.5px;">Penjelasan konsep di bawah ini sengaja tanpa kode — fokusnya mengenali cara kerja & tanda-tandanya, bukan cara membuatnya.</p>
+
+      <div class="glossary-item">
+        <div class="glossary-term">🍪 Cookie / Session Stealer</div>
+        <p><strong>Tujuan:</strong> mencuri cookie sesi login korban agar penyerang bisa membajak akun tanpa perlu tahu password.</p>
+        <p><strong>Cara kerja umum:</strong> disisipkan lewat celah XSS pada halaman yang rentan; skrip membaca cookie yang tidak terlindungi lalu mengirimkannya diam-diam ke server milik penyerang.</p>
+        <p><strong>Pencegahan:</strong> set cookie sesi dengan flag HttpOnly & Secure, sanitasi semua output ke HTML, terapkan Content Security Policy (CSP).</p>
+      </div>
+
+      <div class="glossary-item">
+        <div class="glossary-term">⌨️ Keylogger Berbasis Skrip</div>
+        <p><strong>Tujuan:</strong> merekam apa yang diketik pengguna — termasuk password dan data kartu — di halaman yang sudah disusupi.</p>
+        <p><strong>Cara kerja umum:</strong> skrip "mendengarkan" setiap ketikan pada form lalu mengirim hasilnya ke server luar, biasanya berjalan senyap tanpa indikasi visual.</p>
+        <p><strong>Pencegahan:</strong> gunakan password manager dengan autofill (tidak bisa disadap keylogger ketik), aktifkan 2FA, hanya percaya skrip pihak ketiga dari sumber tepercaya.</p>
+      </div>
+
+      <div class="glossary-item">
+        <div class="glossary-term">🖱️ Clickjacking Overlay</div>
+        <p><strong>Tujuan:</strong> menipu korban agar mengklik tombol tersembunyi (misalnya "Transfer" atau "Izinkan") tanpa sadar.</p>
+        <p><strong>Cara kerja umum:</strong> halaman target ditumpuk secara transparan (lewat iframe) di bawah halaman umpan yang terlihat biasa, sehingga klik pengguna sebenarnya mengenai elemen tersembunyi itu.</p>
+        <p><strong>Pencegahan:</strong> situs memasang header X-Frame-Options / Content-Security-Policy: frame-ancestors agar tidak bisa dimuat dalam iframe pihak lain.</p>
+      </div>
+
+      <div class="glossary-item">
+        <div class="glossary-term">⛏️ Cryptojacking (In-Browser Miner)</div>
+        <p><strong>Tujuan:</strong> memakai daya CPU pengunjung situs untuk menambang cryptocurrency tanpa izin.</p>
+        <p><strong>Cara kerja umum:</strong> skrip miner disisipkan ke halaman (lewat situs yang disusupi atau iklan jahat) dan berjalan di latar belakang selama tab tersebut terbuka.</p>
+        <p><strong>Ciri-ciri:</strong> perangkat tiba-tiba panas & lambat saat membuka tab tertentu, penggunaan CPU melonjak tanpa sebab jelas.</p>
+        <p><strong>Pencegahan:</strong> pakai ad-blocker/ekstensi anti-cryptojacking, waspada situs streaming atau unduhan ilegal yang sering jadi sumbernya.</p>
+      </div>
+
+      <div class="glossary-item">
+        <div class="glossary-term">💳 Formjacking / Payment Skimmer</div>
+        <p><strong>Tujuan:</strong> mencuri data kartu pembayaran langsung dari form checkout situs belanja online.</p>
+        <p><strong>Cara kerja umum:</strong> skrip jahat disisipkan lewat celah di CMS atau library pihak ketiga yang disusupi, lalu menyalin data form pembayaran sebelum dikirim ke server penyerang.</p>
+        <p><strong>Pencegahan (untuk pemilik situs):</strong> audit dependency pihak ketiga secara rutin, terapkan Subresource Integrity (SRI) & CSP, pantau perubahan file yang mencurigakan.</p>
+      </div>
+
+      <div class="glossary-item">
+        <div class="glossary-term">↪️ Malicious Redirect / Malvertising</div>
+        <p><strong>Tujuan:</strong> memaksa pengunjung terbuka ke situs phishing, scareware, atau unduhan berbahaya.</p>
+        <p><strong>Cara kerja umum:</strong> skrip disisipkan lewat iklan pihak ketiga (malvertising) atau situs yang disusupi, memaksa browser membuka tab/pop-up baru atau redirect otomatis.</p>
+        <p><strong>Ciri-ciri:</strong> muncul pop-up peringatan palsu ("perangkat Anda terinfeksi!") atau redirect tiba-tiba ke situs asing.</p>
+        <p><strong>Pencegahan:</strong> aktifkan pop-up blocker & ad-blocker, jangan klik notifikasi/pop-up mencurigakan.</p>
+      </div>
+
+      <div class="glossary-item">
+        <div class="glossary-term">🎭 Fake Login Overlay</div>
+        <p><strong>Tujuan:</strong> menipu pengguna memasukkan kredensial ke form palsu yang terlihat identik dengan aslinya.</p>
+        <p><strong>Cara kerja umum:</strong> elemen HTML/CSS disisipkan untuk meniru tampilan form login asli, biasanya di atas halaman yang sudah disusupi.</p>
+        <p><strong>Ciri-ciri:</strong> alamat di address bar tidak sesuai dengan yang biasa, form muncul tiba-tiba atau tampilannya sedikit berbeda dari biasanya.</p>
+        <p><strong>Pencegahan:</strong> selalu periksa URL sebelum login, gunakan password manager — ia tidak akan auto-fill di domain palsu.</p>
+      </div>
+
+      <div class="glossary-item">
+        <div class="glossary-term">🧩 Obfuscated Loader / Dropper</div>
+        <p><strong>Tujuan:</strong> menyembunyikan maksud sebenarnya dari sebuah skrip agar lolos dari filter keamanan, biasanya untuk memuat payload berbahaya tahap berikutnya.</p>
+        <p><strong>Cara kerja umum:</strong> kode ditulis dalam bentuk yang sangat sulit dibaca manusia (string ter-encode, pemanggilan berlapis) yang saat dijalankan akan mengunduh & menjalankan kode sebenarnya.</p>
+        <p><strong>Ciri-ciri:</strong> kode sangat panjang dan tidak terbaca, dipenuhi pemanggilan fungsi dekode berantai.</p>
+        <p><strong>Pencegahan:</strong> waspada terhadap skrip pihak ketiga yang disamarkan tanpa alasan jelas, gunakan CSP untuk membatasi sumber skrip yang boleh dijalankan.</p>
+      </div>
+
+      <div class="glossary-item">
+        <div class="glossary-term">🧭 Browser Extension Hijacker</div>
+        <p><strong>Tujuan:</strong> mengubah perilaku browser — mengganti hasil pencarian, menyuntikkan iklan, atau mencuri data browsing.</p>
+        <p><strong>Cara kerja umum:</strong> ekstensi yang awalnya sah dijual atau diretas, lalu pembaruannya disisipi skrip jahat yang berjalan di semua halaman yang dibuka.</p>
+        <p><strong>Ciri-ciri:</strong> muncul iklan aneh di semua situs, homepage/mesin pencari berubah sendiri.</p>
+        <p><strong>Pencegahan:</strong> hanya pasang ekstensi dari sumber tepercaya, cek ulasan & jumlah pengguna, hapus ekstensi yang sudah tidak dipakai.</p>
+      </div>
+
+      <div class="glossary-item">
+        <div class="glossary-term">📋 Clipboard Hijacker</div>
+        <p><strong>Tujuan:</strong> mengganti isi clipboard korban, misalnya menukar alamat wallet crypto yang disalin dengan alamat milik penyerang.</p>
+        <p><strong>Cara kerja umum:</strong> skrip memantau aksi copy pada halaman dan diam-diam mengganti teks yang tersalin sebelum ditempel korban.</p>
+        <p><strong>Pencegahan:</strong> selalu periksa ulang beberapa karakter awal & akhir setelah paste, terutama untuk transaksi finansial/crypto.</p>
+      </div>
+    </div>
+
+    <div class="tab-panel" data-panel="sumber">
+      <p style="margin:0 0 12px; font-size:11.5px;">Kuis ini pas untuk membangun intuisi dasar, tapi untuk benar-benar mahir kamu perlu latihan langsung di lingkungan yang lebih lengkap. Berikut tempat belajar yang direkomendasikan dan dipercaya banyak praktisi:</p>
+
+      <div class="glossary-item">
+        <div class="glossary-term">🔺 OWASP</div>
+        <p>Organisasi nirlaba global yang menetapkan standar keamanan aplikasi web — materinya jadi rujukan hampir semua sertifikasi & tim keamanan profesional. Mulai dari OWASP Top 10, lalu coba OWASP Juice Shop (aplikasi yang sengaja dibuat rentan, legal untuk latihan).</p>
+        <p><a href="https://owasp.org" target="_blank" rel="noopener">owasp.org</a></p>
+      </div>
+
+      <div class="glossary-item">
+        <div class="glossary-term">🎯 PortSwigger Web Security Academy</div>
+        <p>Materi keamanan web yang paling sering direkomendasikan praktisi — 100% gratis, dengan lab interaktif di aplikasi sungguhan (bukan simulasi). Disarankan mulai dari topik server-side (SQL Injection, dsb) karena lebih mudah dipahami pemula.</p>
+        <p><a href="https://portswigger.net/web-security" target="_blank" rel="noopener">portswigger.net/web-security</a></p>
+      </div>
+
+      <div class="glossary-item">
+        <div class="glossary-term">🧭 TryHackMe</div>
+        <p>Belajar sambil praktik langsung lewat browser, dengan jalur "Pre Security" dan "Complete Beginner" yang memang dirancang untuk yang belum punya pengalaman sama sekali. Ada tingkatan gratis yang cukup lengkap untuk pemula.</p>
+        <p><a href="https://tryhackme.com" target="_blank" rel="noopener">tryhackme.com</a></p>
+      </div>
+
+      <div class="glossary-item">
+        <div class="glossary-term">🇮🇩 BSSN — Edukasi & Literasi Siber</div>
+        <p>Materi literasi keamanan siber resmi dari Badan Siber dan Sandi Negara, dalam Bahasa Indonesia — cocok untuk membangun kesadaran keamanan sehari-hari di luar sisi teknis pemrograman.</p>
+        <p><a href="https://www.bssn.go.id/edukasi-dan-literasi/" target="_blank" rel="noopener">bssn.go.id/edukasi-dan-literasi</a></p>
+      </div>
+
+      <p style="margin-top:2px; font-size:11px; color:var(--text-dim); line-height:1.6;">Semua platform di atas legal & aman untuk latihan. Prinsipnya: coba teknik apa pun hanya pada sistem milik sendiri atau lingkungan lab yang memang disediakan untuk latihan (seperti di atas) — jangan pernah pada sistem milik orang lain tanpa izin.</p>
+    </div>
+  </div>
+</div>
+
+
+<script>
+(function(){
+  "use strict";
+
+  var QUESTIONS = [
+    // ===================== DASAR =====================
+    {
+      type:"theory", difficulty:"dasar",
+      question:"Apa itu autentikasi (authentication) dalam konteks keamanan aplikasi?",
+      options:["Proses memverifikasi identitas pengguna","Proses mengenkripsi seluruh isi database","Proses mencadangkan data secara berkala","Proses mempercepat akses ke server"],
+      correct:0,
+      hint:"Fokus pada kata 'identitas' — bukan soal enkripsi atau backup.",
+      why:"Autentikasi menjawab pertanyaan 'siapa kamu?' — biasanya lewat username+password, biometrik, atau token.",
+      takeaway:"Bedakan autentikasi (memastikan identitas) dan otorisasi (menentukan hak akses) saat merancang sistem login."
+    },
+    {
+      type:"theory", difficulty:"dasar",
+      question:"Apa fungsi utama HTTPS dibandingkan HTTP biasa?",
+      options:["Mempercepat waktu loading halaman","Mengenkripsi data yang dikirim antara klien dan server","Mengurangi ukuran file yang dikirim","Mencegah munculnya error 404"],
+      correct:1,
+      hint:"'S' pada HTTPS berkaitan dengan lapisan keamanan tambahan, bukan performa.",
+      why:"HTTPS menambahkan lapisan enkripsi (TLS) di atas HTTP, sehingga data yang dikirim antara klien dan server tidak bisa dibaca atau diubah pihak ketiga.",
+      takeaway:"Gunakan HTTPS di semua halaman yang menerima input pengguna, bukan hanya halaman login."
+    },
+    {
+      type:"theory", difficulty:"dasar",
+      question:"Apa yang dimaksud dengan 'phishing'?",
+      options:["Serangan yang mengeksploitasi bug pada database","Upaya menipu korban agar memberikan informasi sensitif lewat pesan atau situs palsu","Teknik mengenkripsi file korban lalu meminta tebusan","Memindai port yang terbuka pada server target"],
+      correct:1,
+      hint:"Kata kuncinya adalah 'menipu', bukan mengeksploitasi sistem secara teknis.",
+      why:"Phishing memanfaatkan rekayasa sosial — email, pesan, atau situs palsu yang menyamar sah — untuk memancing korban memberikan data sensitif seperti password.",
+      takeaway:"Selalu periksa alamat pengirim/URL sebelum memasukkan kredensial, dan jangan klik link mencurigakan dari sumber tak dikenal."
+    },
+    {
+      type:"theory", difficulty:"dasar",
+      question:"Mengapa password seperti '123456' atau 'password' sangat berisiko?",
+      options:["Karena terlalu pendek untuk diketik","Karena mudah ditebak lewat daftar password paling umum (dictionary attack)","Karena tidak didukung banyak sistem","Karena hanya berupa angka"],
+      correct:1,
+      hint:"Penyerang tidak menebak asal-asalan — mereka pakai daftar password yang paling sering dipakai orang.",
+      why:"Penyerang menyimpan daftar jutaan password paling umum digunakan (wordlist) dan mencobanya satu per satu — password umum akan langsung ditemukan dalam hitungan detik.",
+      takeaway:"Gunakan password unik & panjang (atau passphrase) untuk tiap akun, idealnya lewat password manager."
+    },
+    {
+      type:"theory", difficulty:"dasar",
+      question:"Apa tujuan utama Two-Factor Authentication (2FA)?",
+      options:["Mempercepat proses login","Menambah lapisan verifikasi tambahan selain password","Menggantikan kebutuhan password sepenuhnya","Mengenkripsi seluruh isi database"],
+      correct:1,
+      hint:"'Two-Factor' berarti dua lapis — password tetap dipakai, ditambah satu verifikasi lagi.",
+      why:"2FA menambahkan faktor verifikasi kedua (misalnya kode OTP atau perangkat fisik), sehingga akun tetap relatif aman meski password bocor.",
+      takeaway:"Aktifkan 2FA terutama untuk email, akun bank, dan akun developer/repositori kode."
+    },
+    {
+      type:"theory", difficulty:"dasar",
+      question:"Kenapa kita sebaiknya tidak membagikan password lewat chat atau email biasa?",
+      options:["Karena pesan bisa tersimpan sebagai log atau disadap secara tidak terenkripsi","Karena chat/email membatasi jumlah karakter","Karena hanya admin yang boleh mengetahui password","Karena password akan otomatis kedaluwarsa"],
+      correct:0,
+      hint:"Pikirkan ke mana pesan itu tersimpan setelah dikirim, bukan soal aturan siapa yang boleh tahu.",
+      why:"Pesan chat/email sering tersimpan sebagai log yang bisa dibaca admin sistem, disadap, atau bocor lewat kebocoran data platform tersebut.",
+      takeaway:"Gunakan fitur 'secure sharing' pada password manager atau secret manager, bukan chat biasa, untuk berbagi kredensial."
+    },
+    {
+      type:"code", difficulty:"dasar",
+      question:"Kenapa potongan kode berikut berisiko dari sisi keamanan?",
+      codeLabel:"login.js",
+      code:"const password = \"admin123\";\nif (inputPassword === password) {\n  login();\n}",
+      options:["Password dibandingkan dengan operator yang salah","Password ditulis langsung (hardcoded) di kode sumber","Variabel password seharusnya berupa array","Fungsi login() dipanggil dua kali"],
+      correct:1,
+      hint:"Perhatikan dari mana nilai variabel 'password' berasal — ditulis langsung di kode atau diambil dari tempat aman?",
+      why:"Sama seperti API key, kredensial yang hardcoded bisa terlihat siapa saja yang mengakses source code, misalnya lewat repository publik atau proses build, dan sulit diganti tanpa deploy ulang.",
+      takeaway:"Simpan kredensial di environment variable atau secret manager, dan jangan pernah commit password ke version control."
+    },
+    {
+      type:"theory", difficulty:"dasar",
+      question:"Apa itu firewall, secara sederhana?",
+      options:["Program yang mempercepat koneksi internet","Sistem yang menyaring lalu lintas jaringan berdasarkan aturan keamanan","Alat untuk mencadangkan data secara otomatis","Software untuk mengedit kode program"],
+      correct:1,
+      hint:"Bayangkan firewall sebagai penjaga gerbang, bukan sebagai alat backup atau editor.",
+      why:"Firewall bertindak sebagai penjaga gerbang yang mengizinkan atau memblokir lalu lintas jaringan masuk/keluar berdasarkan aturan (misalnya port, IP, protokol) yang ditentukan.",
+      takeaway:"Firewall hanyalah satu lapisan pertahanan — tetap perlu dikombinasikan dengan praktik lain seperti update software rutin dan validasi input."
+    },
+    {
+      type:"theory", difficulty:"dasar",
+      question:"Kenapa update/patch keamanan pada aplikasi dan sistem operasi itu penting?",
+      options:["Supaya tampilan aplikasi terlihat lebih modern","Karena update biasanya menambal celah keamanan yang baru ditemukan pada versi sebelumnya","Supaya ukuran aplikasi menjadi lebih kecil","Karena update wajib dilakukan setiap hari agar aplikasi tetap bisa dibuka"],
+      correct:1,
+      hint:"Update keamanan paling sering dirilis setelah peneliti atau penyerang menemukan sesuatu yang perlu diperbaiki.",
+      why:"Update/patch keamanan dirilis pengembang untuk menambal celah (vulnerability) yang baru ditemukan pada versi sebelumnya, sebelum sempat dieksploitasi secara luas oleh penyerang.",
+      takeaway:"Aktifkan update otomatis untuk sistem operasi & aplikasi penting, dan jangan menunda-nunda update yang berlabel keamanan."
+    },
+
+    // ===================== MENENGAH =====================
+    {
+      type:"code", difficulty:"menengah",
+      question:"Apa kerentanan utama pada potongan kode berikut?",
+      codeLabel:"login.js",
+      code:"const query = \"SELECT * FROM users WHERE username='\" + username +\n  \"' AND password='\" + password + \"'\";\ndb.execute(query);",
+      options:["Cross-Site Scripting (XSS)","SQL Injection","Buffer Overflow","Insecure Deserialization"],
+      correct:1,
+      hint:"Perhatikan bagaimana variabel username dan password digabung langsung ke dalam teks query.",
+      why:"Input pengguna digabung langsung ke query SQL tanpa prepared statement, sehingga penyerang bisa menyisipkan perintah SQL berbahaya lewat kolom username/password (misalnya mengisi username dengan ' OR '1'='1).",
+      takeaway:"Gunakan prepared statement / parameterized query di semua akses database, jangan pernah menggabung string input pengguna ke query secara langsung."
+    },
+    {
+      type:"code", difficulty:"menengah",
+      question:"Apa risiko keamanan pada baris kode berikut?",
+      codeLabel:"profile.js",
+      code:"document.getElementById('welcome').innerHTML =\n  \"Halo, \" + userInput;",
+      options:["Cross-Site Scripting (XSS)","Cross-Site Request Forgery (CSRF)","Race Condition","Memory Leak"],
+      correct:0,
+      hint:"innerHTML akan menjalankan tag HTML/script apa pun yang ada di dalam teksnya.",
+      why:"userInput dimasukkan langsung ke innerHTML tanpa sanitasi. Jika userInput berisi tag <script>, browser korban akan mengeksekusinya — inilah XSS.",
+      takeaway:"Gunakan textContent untuk teks biasa, atau sanitasi/escape HTML terlebih dulu sebelum merender input pengguna ke halaman."
+    },
+    {
+      type:"theory", difficulty:"menengah",
+      question:"Apa yang dimaksud dengan serangan CSRF (Cross-Site Request Forgery)?",
+      options:["Mencuri sesi login lewat cookie yang bocor","Memaksa korban mengirim request tanpa sadar ke situs tempat ia sudah login","Menebak password lewat brute force","Menyadap trafik jaringan Wi-Fi publik"],
+      correct:1,
+      hint:"Serangan ini memanfaatkan sesi login korban yang masih aktif di browser, bukan mencuri password secara langsung.",
+      why:"CSRF mengelabui browser korban yang sudah login agar mengirim request (misalnya transfer dana) ke situs target tanpa sepengetahuan korban, biasanya lewat halaman/link jebakan.",
+      takeaway:"Gunakan CSRF token pada setiap form/aksi penting, dan pastikan cookie sesi memakai atribut SameSite yang sesuai."
+    },
+    {
+      type:"theory", difficulty:"menengah",
+      question:"Algoritma hashing mana yang PALING TIDAK disarankan untuk menyimpan password saat ini?",
+      options:["bcrypt","Argon2","MD5","scrypt"],
+      correct:2,
+      hint:"Tiga dari empat pilihan ini memang dirancang khusus untuk password — satu di antaranya bukan.",
+      why:"MD5 dirancang untuk kecepatan, bukan keamanan password — rentan collision dan mudah dipecahkan lewat rainbow table. bcrypt, Argon2, dan scrypt dirancang khusus untuk password dengan salt dan cost factor.",
+      takeaway:"Selalu gunakan algoritma khusus password hashing (bcrypt/Argon2/scrypt), jangan pernah MD5 atau SHA1 mentah."
+    },
+    {
+      type:"code", difficulty:"menengah",
+      question:"Mengapa penggunaan eval() pada input pengguna berikut berbahaya?",
+      codeLabel:"calculator.js",
+      code:"function calculate(expr) {\n  return eval(expr);\n}\ncalculate(userInput);",
+      options:["Membuat kode berjalan lebih lambat","Memungkinkan eksekusi kode arbitrer dari input yang tidak tepercaya","Tidak mendukung bilangan desimal","Menyebabkan memory leak"],
+      correct:1,
+      hint:"eval() menjalankan string sebagai kode program — bukan hanya menghitungnya sebagai angka.",
+      why:"eval() mengeksekusi string sebagai kode JavaScript apa pun. Jika string itu berasal dari input pengguna, penyerang bisa menjalankan kode apa pun di dalam aplikasi.",
+      takeaway:"Hindari eval() untuk memproses input pengguna. Untuk kalkulator, gunakan parser ekspresi matematika khusus yang aman."
+    },
+    {
+      type:"theory", difficulty:"menengah",
+      question:"Apa inti dari prinsip 'Least Privilege' dalam keamanan siber?",
+      options:["Memberi semua pengguna akses admin agar mudah dikelola","Memberi akses minimum yang benar-benar diperlukan untuk menjalankan tugas","Menonaktifkan semua log akses sistem","Menggunakan satu password yang sama untuk semua akun"],
+      correct:1,
+      hint:"'Least' berarti paling sedikit — pikirkan akses seminimal mungkin, bukan semaksimal mungkin.",
+      why:"Least privilege berarti setiap pengguna atau sistem hanya diberi hak akses seminimal mungkin sesuai kebutuhan tugasnya, untuk membatasi dampak jika terjadi kebocoran.",
+      takeaway:"Saat membuat akun/servis baru, mulai dari akses paling minim lalu tambahkan hanya yang benar-benar diperlukan."
+    },
+    {
+      type:"code", difficulty:"menengah",
+      question:"Kerentanan apa yang muncul jika parameter host berasal dari input pengguna?",
+      codeLabel:"network_tool.py",
+      code:"import os\ndef ping_host(host):\n    os.system(\"ping -c 1 \" + host)",
+      options:["Command Injection","Integer Overflow","Null Pointer Exception","Deadlock"],
+      correct:0,
+      hint:"host digabung langsung ke perintah shell — pikirkan apa yang terjadi jika host berisi karakter seperti titik koma.",
+      why:"Input host digabung langsung ke perintah shell. Penyerang bisa menambahkan perintah lain, misalnya '; rm -rf /', yang akan ikut dieksekusi oleh sistem.",
+      takeaway:"Jangan pernah menggabung input pengguna ke perintah shell. Gunakan library yang menerima argumen terpisah (bukan string gabungan) dan validasi input secara ketat."
+    },
+    {
+      type:"code", difficulty:"menengah",
+      question:"Apa yang salah dari konfigurasi CORS berikut?",
+      codeLabel:"server.js",
+      code:"app.use(cors({\n  origin: \"*\",\n  credentials: true\n}));",
+      options:["Mengizinkan semua origin sekaligus mengirim cookie/kredensial — sangat berisiko","Tidak mendukung metode HTTP POST","Membuat request menjadi terlalu lambat","Tidak kompatibel dengan browser versi lama"],
+      correct:0,
+      hint:"Perhatikan kombinasi dua opsi ini bersamaan: origin '*' dan credentials true.",
+      why:"Kombinasi origin wildcard '*' dengan credentials:true membuka celah pencurian data lintas domain. Browser modern bahkan menolak kombinasi ini karena berbahaya.",
+      takeaway:"Tentukan daftar origin yang diizinkan secara eksplisit (allowlist) jika endpoint membutuhkan credentials, jangan gunakan wildcard."
+    },
+    {
+      type:"theory", difficulty:"menengah",
+      question:"Apa itu IDOR (Insecure Direct Object Reference)?",
+      options:["Kerentanan saat aplikasi mengizinkan akses ke data lain hanya dengan mengubah ID di URL/parameter, tanpa cek otorisasi","Serangan yang mengenkripsi file lalu meminta tebusan","Teknik memindai port terbuka pada server","Kesalahan saat mengatur ukuran buffer memori"],
+      correct:0,
+      hint:"Bayangkan mengubah angka di URL seperti ?id=1023 menjadi ?id=1024 dan ternyata bisa melihat data orang lain.",
+      why:"Contoh: /invoice?id=1023 lalu pengguna mengganti jadi id=1024 dan ternyata bisa melihat invoice orang lain, karena server tidak memverifikasi bahwa invoice itu benar miliknya.",
+      takeaway:"Selalu verifikasi kepemilikan/izin akses di sisi server untuk setiap objek yang diminta, jangan hanya mengandalkan ID yang 'sulit ditebak'."
+    },
+    {
+      type:"code", difficulty:"menengah",
+      question:"Apa masalah keamanan pada fungsi pembuat session ID berikut?",
+      codeLabel:"session.js",
+      code:"function generateSessionId() {\n  return Math.random().toString(36).substring(2);\n}",
+      options:["Math.random() tidak cukup acak secara kriptografis untuk keperluan keamanan","Fungsi ini terlalu lambat saat dijalankan","substring() menyebabkan error di beberapa browser","Session ID yang dihasilkan terlalu panjang"],
+      correct:0,
+      hint:"Math.random() dirancang untuk keperluan umum seperti game/animasi — bukan untuk hal yang berkaitan dengan keamanan.",
+      why:"Math.random() hasilnya bisa diprediksi oleh penyerang, sehingga session ID berpotensi ditebak dan dipakai untuk membajak sesi pengguna lain (session hijacking).",
+      takeaway:"Gunakan generator acak kriptografis seperti crypto.randomUUID() atau crypto.getRandomValues() untuk apa pun yang berkaitan dengan keamanan."
+    },
+    {
+      type:"theory", difficulty:"menengah",
+      question:"Apa itu clickjacking?",
+      options:["Menipu pengguna agar mengklik elemen tersembunyi dengan memuat halaman target dalam iframe transparan","Mencuri klik mouse lewat malware khusus","Serangan yang membuat mouse tidak responsif","Teknik mempercepat loading tombol pada halaman"],
+      correct:0,
+      hint:"Serangan ini bermain dengan tampilan visual — menumpuk halaman asli di balik halaman umpan yang terlihat berbeda.",
+      why:"Penyerang menumpuk halaman target (misalnya tombol 'Transfer') dalam iframe tak terlihat di atas halaman umpan, sehingga klik pengguna sebenarnya mengenai tombol tersembunyi itu.",
+      takeaway:"Gunakan header keamanan seperti X-Frame-Options atau Content-Security-Policy: frame-ancestors untuk mencegah situs dimuat dalam iframe pihak lain."
+    },
+    {
+      type:"code", difficulty:"menengah",
+      question:"Kerentanan apa yang muncul karena endpoint login berikut tidak membatasi jumlah percobaan?",
+      codeLabel:"auth.js",
+      code:"app.post('/login', (req, res) => {\n  // tidak ada pembatasan percobaan\n  checkCredentials(req.body);\n});",
+      options:["Rentan terhadap brute force / credential stuffing","Rentan terhadap SQL Injection secara otomatis","Menyebabkan memory leak pada server","Membuat file CSS gagal termuat"],
+      correct:0,
+      hint:"Bayangkan penyerang mencoba ribuan kombinasi password secara otomatis tanpa ada yang menghentikannya.",
+      why:"Tanpa pembatasan percobaan, penyerang bisa mencoba ribuan kombinasi username/password secara otomatis (brute force), atau memakai daftar kredensial bocor dari situs lain (credential stuffing).",
+      takeaway:"Terapkan rate limiting, CAPTCHA setelah beberapa kali gagal, dan penguncian akun sementara pada endpoint autentikasi."
+    },
+    {
+      type:"code", difficulty:"menengah",
+      question:"Apa risiko utama jika kredensial berikut dibiarkan begitu saja di lingkungan produksi?",
+      codeLabel:"admin_config.js",
+      code:"// konfigurasi awal panel admin\nconst ADMIN_USER = \"admin\";\nconst ADMIN_PASS = \"admin\";",
+      options:["Penyerang bisa login memakai kredensial default yang sudah umum diketahui publik","Aplikasi akan berjalan lebih lambat dari biasanya","Server tidak bisa menerima banyak pengguna sekaligus","Kode menjadi lebih sulit dibaca oleh developer lain"],
+      correct:0,
+      hint:"Kredensial seperti admin/admin sudah ada di banyak daftar publik yang dipakai penyerang secara otomatis.",
+      why:"Banyak perangkat & aplikasi memakai kredensial default saat pertama dipasang. Jika tidak diganti, penyerang bisa langsung mencobanya dari daftar kredensial default yang sudah dikenal luas — bahkan tanpa perlu brute force sama sekali.",
+      takeaway:"Selalu ganti kredensial default segera setelah instalasi, dan wajibkan penggantian password saat setup awal (forced first-login change)."
+    },
+
+    // ===================== LANJUTAN =====================
+    {
+      type:"theory", difficulty:"lanjutan",
+      question:"Apa itu enkripsi 'at rest' dan kenapa penting?",
+      options:["Enkripsi data saat sedang dikirim lewat jaringan","Enkripsi data yang tersimpan di disk/database, agar tetap aman meski server atau backup dicuri","Enkripsi yang hanya berlaku saat aplikasi sedang idle","Enkripsi khusus untuk file gambar saja"],
+      correct:1,
+      hint:"'At rest' artinya data sedang diam/tersimpan, bukan sedang berpindah lewat jaringan.",
+      why:"Enkripsi 'at rest' melindungi data yang tersimpan, bukan yang sedang dikirim. Jika hard disk atau backup dicuri/bocor, data tetap tidak terbaca tanpa kunci enkripsi.",
+      takeaway:"Lengkapi enkripsi in-transit (HTTPS/TLS) dengan enkripsi at-rest untuk data sensitif seperti data pribadi dan pembayaran."
+    },
+    {
+      type:"code", difficulty:"lanjutan",
+      question:"Apa risiko utama pada endpoint upload file berikut?",
+      codeLabel:"upload.js",
+      code:"app.post('/upload', (req, res) => {\n  const file = req.files.avatar;\n  file.mv('./uploads/' + file.name);\n});",
+      options:["Nama & tipe file dari pengguna dipakai langsung tanpa validasi, membuka celah upload file berbahaya","File yang diunggah terlalu besar untuk diproses","Endpoint ini tidak mendukung method GET","Folder uploads belum dibuat sebelumnya"],
+      correct:0,
+      hint:"Perhatikan file.name dipakai langsung sebagai nama & lokasi penyimpanan tanpa pengecekan apa pun.",
+      why:"Tanpa validasi tipe, ekstensi, dan sanitasi nama file, penyerang bisa mengunggah file berbahaya (misalnya script server-side) yang kemudian dieksekusi server, atau menimpa file lain lewat manipulasi nama file.",
+      takeaway:"Validasi tipe & ukuran file, buat nama file baru secara acak, dan simpan di luar direktori yang bisa dieksekusi langsung oleh server."
+    },
+    {
+      type:"code", difficulty:"lanjutan",
+      question:"Kenapa header token berikut berbahaya jika tidak divalidasi dengan benar oleh server?",
+      codeLabel:"jwt_header.json",
+      code:"{\n  \"alg\": \"none\",\n  \"typ\": \"JWT\"\n}",
+      options:["Token tanpa tanda tangan bisa dipalsukan bebas karena server menganggapnya valid tanpa verifikasi","Token menjadi terlalu panjang untuk dikirim","Server akan otomatis menolak semua token yang masuk","Format JSON pada header menjadi tidak valid"],
+      correct:0,
+      hint:"alg:\"none\" secara harfiah berarti token ini tidak ditandatangani sama sekali.",
+      why:"Jika server tidak secara eksplisit menolak alg:'none', penyerang bisa membuat token palsu berisi klaim apa pun (misalnya role:'admin') tanpa perlu mengetahui kunci rahasia server.",
+      takeaway:"Selalu validasi algoritma tanda tangan JWT secara eksplisit di sisi server (whitelist algoritma yang diizinkan), jangan pernah mempercayai header token begitu saja."
+    },
+    {
+      type:"theory", difficulty:"lanjutan",
+      question:"Apa itu SSRF (Server-Side Request Forgery)?",
+      options:["Kerentanan yang membuat server dipaksa mengirim request ke alamat internal/tak terduga atas perintah penyerang","Serangan yang mengeksploitasi kelemahan pada file CSS","Teknik mengenkripsi seluruh lalu lintas jaringan","Kesalahan konfigurasi pada DNS publik"],
+      correct:0,
+      hint:"Ini soal server yang 'dipaksa' membuat request, bukan soal enkripsi atau CSS.",
+      why:"Jika aplikasi mengambil URL dari input pengguna lalu server-lah yang melakukan request (misalnya untuk fitur preview link), penyerang bisa mengarahkan server mengakses layanan internal yang seharusnya tidak bisa diakses dari luar.",
+      takeaway:"Validasi & batasi (allowlist) domain/IP tujuan saat server melakukan request atas nama pengguna, terutama untuk fitur seperti 'fetch URL' atau webhook."
+    },
+    {
+      type:"code", difficulty:"lanjutan",
+      question:"Apa kerentanan pada endpoint download berikut jika parameter name tidak divalidasi?",
+      codeLabel:"download.js",
+      code:"app.get('/download', (req, res) => {\n  res.sendFile('./files/' + req.query.name);\n});",
+      options:["Path traversal — penyerang bisa memakai '../../' untuk membaca file di luar folder files","Endpoint ini hanya mendukung file berukuran kecil","Response akan selalu mengembalikan error 500","File yang dikirim akan otomatis terkompresi"],
+      correct:0,
+      hint:"Coba bayangkan jika req.query.name diisi dengan sesuatu seperti '../../.env'.",
+      why:"Dengan input seperti '../../.env', nama file yang digabung langsung ke path bisa 'keluar' dari folder files dan membaca file sensitif lain di server, misalnya file konfigurasi.",
+      takeaway:"Validasi nama file terhadap daftar yang diizinkan (allowlist), dan gunakan fungsi normalisasi path untuk memastikan hasil akhir tetap berada di dalam folder yang diizinkan."
+    },
+    {
+      type:"theory", difficulty:"lanjutan",
+      question:"Apa itu prinsip 'Defense in Depth'?",
+      options:["Menerapkan banyak lapisan pertahanan keamanan sekaligus, sehingga jika satu lapisan gagal, lapisan lain tetap melindungi","Menggunakan satu firewall yang sangat kuat sebagai satu-satunya pertahanan","Menyembunyikan alamat server agar tidak bisa ditemukan","Menonaktifkan semua fitur aplikasi agar tidak ada celah"],
+      correct:0,
+      hint:"'Depth' berarti kedalaman/berlapis — bukan soal satu pertahanan yang sangat kuat.",
+      why:"Tidak ada satu kontrol keamanan yang sempurna. Defense in depth menggabungkan banyak lapisan (validasi input, autentikasi, enkripsi, firewall, monitoring) agar kegagalan satu lapisan tidak langsung berakibat fatal.",
+      takeaway:"Saat merancang sistem, jangan bergantung pada satu mekanisme keamanan saja — kombinasikan beberapa lapisan pertahanan sekaligus."
+    },
+    {
+      type:"code", difficulty:"lanjutan",
+      question:"Kerentanan apa yang bisa muncul jika endpoint redeem voucher berikut dipanggil berkali-kali secara bersamaan dalam waktu sangat berdekatan?",
+      codeLabel:"voucher.js",
+      code:"if (voucher.balance > 0) {\n  await sleep(50); // proses lain\n  voucher.balance -= amount;\n  await save(voucher);\n}",
+      options:["Race condition — saldo bisa terpakai melebihi batas karena cek & kurangi saldo tidak dilakukan atomik","Endpoint akan otomatis menolak semua request setelah request pertama","Server akan mengalami memory leak permanen","Data voucher akan otomatis terenkripsi"],
+      correct:0,
+      hint:"Perhatikan ada jeda antara 'mengecek saldo' dan 'mengurangi saldo' — apa yang terjadi kalau ada request lain masuk tepat di jeda itu?",
+      why:"Karena pengecekan saldo dan pengurangannya terpisah dengan jeda di antaranya, beberapa request yang datang hampir bersamaan bisa sama-sama lolos pengecekan sebelum saldo sempat diperbarui — sehingga voucher bisa dipakai berkali-kali melebihi saldo aslinya (race condition / TOCTOU).",
+      takeaway:"Gunakan operasi atomik (misalnya transaksi database dengan locking, atau operasi decrement atomik) untuk mengecek dan mengubah data sensitif seperti saldo dalam satu langkah, bukan dua langkah terpisah."
+    },
+    {
+      type:"code", difficulty:"lanjutan",
+      question:"Kerentanan apa yang muncul jika seluruh isi req.body langsung dipakai membuat objek User tanpa filter seperti berikut?",
+      codeLabel:"register.js",
+      code:"app.post('/register', (req, res) => {\n  const newUser = new User(req.body);\n  newUser.save();\n});",
+      options:["Mass assignment — penyerang bisa menyisipkan field tak terduga seperti role:\"admin\" saat registrasi","Endpoint ini tidak mendukung format JSON","Password otomatis tersimpan dalam bentuk plain text","Server akan menolak semua request bertipe POST"],
+      correct:0,
+      hint:"Bayangkan penyerang menambahkan field ekstra di body request yang sebetulnya tidak ditampilkan di form registrasi biasa.",
+      why:"Jika model User punya field seperti role atau isAdmin, dan seluruh req.body diteruskan mentah-mentah ke model, penyerang bisa menambahkan field tersebut secara manual di request (di luar form yang terlihat di UI) untuk langsung mendaftar sebagai admin.",
+      takeaway:"Whitelist field yang boleh diisi dari input pengguna secara eksplisit (misalnya hanya name, email, password), jangan pernah meneruskan seluruh body request mentah ke model data."
+    }
+  ];
+
+  var PRACTICE_ITEMS = [
+    {
+      category:"SQL Injection",
+      codeLabel:"login.js",
+      lines:[
+        "const query = \"SELECT * FROM users WHERE username='\" + username +",
+        "  \"' AND password='\" + password + \"'\";",
+        "db.execute(query);"
+      ],
+      vulnLines:[0,1],
+      attackerNote:"Penyerang mencari baris tempat input pengguna (form login, parameter URL, dsb) langsung disambung ke dalam perintah database. Pola string concatenation seperti ini adalah target pertama saat mereka membaca kode sumber atau mencoba payload seperti ' OR '1'='1 di kolom input.",
+      diagOptions:["Buffer Overflow","SQL Injection","Cross-Site Scripting (XSS)","Insecure Deserialization"],
+      diagCorrect:1,
+      diagWhy:"Input username/password digabung langsung ke string query tanpa parameterisasi, sehingga penyerang bisa menyisipkan potongan SQL berbahaya yang mengubah arti query aslinya.",
+      fixOptions:[
+        "db.execute(query.trim());",
+        "db.execute(\"SELECT * FROM users WHERE username=? AND password=?\", [username, password]);",
+        "db.execute(query.split(\"'\").join(\"\"));"
+      ],
+      fixCorrect:1,
+      fixWhy:"Prepared statement / parameterized query memisahkan perintah SQL dari data sepenuhnya — nilai username & password dikirim sebagai parameter terpisah, bukan digabung ke teks query, sehingga tidak bisa mengubah struktur query apa pun isinya.",
+      simPayload:"username = admin' OR '1'='1' --",
+      simBefore:"Query menjadi selalu bernilai benar untuk semua baris — sistem login berhasil ditembus tanpa tahu password asli, seluruh data pengguna bisa diakses.",
+      simAfter:"Nilai dikirim sebagai parameter terpisah, bukan bagian dari perintah SQL — server hanya mencari username persis \"admin' OR '1'='1' --\" yang tidak ada, login ditolak."
+    },
+    {
+      category:"Cross-Site Scripting (XSS)",
+      codeLabel:"profile.js",
+      lines:[
+        "const msg = getUrlParam('welcome');",
+        "document.getElementById('box').innerHTML = \"Halo, \" + msg;"
+      ],
+      vulnLines:[1],
+      attackerNote:"Penyerang mencari titik di mana nilai yang bisa mereka kendalikan (parameter URL, kolom komentar, nama profil) dirender langsung sebagai HTML. Mereka lalu mencoba payload sederhana untuk melihat apakah tersaring atau tidak.",
+      diagOptions:["Cross-Site Scripting (XSS)","CSRF","Race Condition","SQL Injection"],
+      diagCorrect:0,
+      diagWhy:"Nilai dari parameter URL dimasukkan langsung ke innerHTML tanpa disaring, sehingga tag atau atribut berbahaya di dalamnya akan dieksekusi browser korban.",
+      fixOptions:[
+        "document.getElementById('box').innerHTML = \"Halo, \" + msg.toUpperCase();",
+        "document.getElementById('box').textContent = \"Halo, \" + msg;",
+        "document.getElementById('box').innerHTML = \"Halo, \" + msg.replace('<', '');"
+      ],
+      fixCorrect:1,
+      fixWhy:"textContent memperlakukan nilai sebagai teks murni, bukan HTML — tag atau script apa pun di dalamnya tidak akan pernah dieksekusi browser, apa pun isinya.",
+      simPayload:"<img src=x onerror=alert(document.cookie)>",
+      simBefore:"Browser korban langsung menjalankan skrip itu saat halaman dimuat — cookie sesi korban bisa dikirim diam-diam ke server milik penyerang.",
+      simAfter:"Teks diperlakukan sebagai string biasa, bukan HTML — tag <img> muncul sebagai teks mentah di layar, tidak pernah dieksekusi."
+    },
+    {
+      category:"Hardcoded Secret",
+      codeLabel:"payment_service.js",
+      lines:[
+        "const STRIPE_KEY = \"sk_live_51Hc8x9J2fA...\";",
+        "",
+        "function charge(amount) {",
+        "  return stripe.charges.create({ amount, key: STRIPE_KEY });",
+        "}"
+      ],
+      vulnLines:[0],
+      attackerNote:"Penyerang yang menemukan akses ke source code (repo publik yang salah setting, riwayat commit lama, atau file build yang bocor) akan mencari pola seperti key=, secret=, atau token= yang diikuti string panjang — target termudah karena tidak perlu teknik hacking sama sekali.",
+      diagOptions:["Hardcoded Secret / Credential Leak","Command Injection","Insecure Deserialization","Clickjacking"],
+      diagCorrect:0,
+      diagWhy:"Kunci rahasia ditulis langsung di source code, sehingga siapa pun yang mengakses kode (misalnya lewat repository) bisa melihat dan menyalahgunakannya.",
+      fixOptions:[
+        "const STRIPE_KEY = \"sk_live_51Hc8x9J2fA\".slice(0, 10);",
+        "const STRIPE_KEY = process.env.STRIPE_KEY;",
+        "const STRIPE_KEY = btoa(\"sk_live_51Hc8x9J2fA...\");"
+      ],
+      fixCorrect:1,
+      fixWhy:"Mengambil nilai dari environment variable berarti secret tidak pernah ikut tersimpan di source code / repository — hanya ada di lingkungan server saat runtime, dan bisa berbeda antar environment tanpa mengubah kode.",
+      simPayload:"Membaca isi source code / riwayat commit repository",
+      simBefore:"Kunci Stripe langsung terlihat sebagai teks biasa di kode — penyerang tinggal menyalinnya dan bisa melakukan charge atas nama akun pembayaran ini.",
+      simAfter:"Kode hanya berisi referensi process.env.STRIPE_KEY — nilai aslinya tidak pernah ikut tersimpan di source code, sehingga tidak ada apa pun yang bisa dicuri dari sana."
+    },
+    {
+      category:"Command Injection",
+      codeLabel:"network_tool.js",
+      lines:[
+        "function pingHost(host) {",
+        "  exec(\"ping -c 1 \" + host, callback);",
+        "}"
+      ],
+      vulnLines:[1],
+      attackerNote:"Penyerang mencari fungsi yang memanggil perintah sistem (exec, system, shell_exec) dengan input pengguna digabung ke dalamnya, lalu mencoba menyisipkan karakter shell seperti ; , && , atau | untuk melihat apakah perintah tambahan ikut terjalankan.",
+      diagOptions:["Command Injection","Buffer Overflow","Insecure Deserialization","Broken Access Control"],
+      diagCorrect:0,
+      diagWhy:"Nilai host digabung langsung ke perintah shell. Karakter khusus bisa dipakai menambahkan perintah lain yang ikut dijalankan sistem.",
+      fixOptions:[
+        "exec(\"ping -c 1 \" + host.toUpperCase(), callback);",
+        "execFile(\"ping\", [\"-c\", \"1\", host], callback);",
+        "exec(\"ping -c 1 \" + host.replace(\";\", \"\"), callback);"
+      ],
+      fixCorrect:1,
+      fixWhy:"execFile menjalankan program dengan argumen yang benar-benar terpisah (bukan satu string gabungan yang diproses shell), sehingga karakter khusus di dalam argumen tidak akan pernah ditafsirkan sebagai perintah tambahan.",
+      simPayload:"8.8.8.8; rm -rf /tmp/data",
+      simBefore:"Shell menjalankan dua perintah sekaligus — ping ke 8.8.8.8 DAN perintah rm -rf yang menghapus data, karena titik koma dianggap pemisah perintah baru.",
+      simAfter:"Seluruh teks diperlakukan sebagai satu argumen host tunggal — ping gagal karena host tidak valid, tidak ada perintah tambahan yang sempat dijalankan."
+    },
+    {
+      category:"Security Misconfiguration (CORS)",
+      codeLabel:"server.js",
+      lines:[
+        "app.use(cors({",
+        "  origin: \"*\",",
+        "  credentials: true",
+        "}));"
+      ],
+      vulnLines:[1,2],
+      attackerNote:"Penyerang membuat halaman di domain lain yang diam-diam mengirim request ke API target. Kalau CORS-nya longgar, browser korban tetap mengizinkan request itu membawa cookie sesi korban — penyerang tinggal membaca responsnya.",
+      diagOptions:["Security Misconfiguration (CORS)","XSS","Race Condition","Path Traversal"],
+      diagCorrect:0,
+      diagWhy:"Origin wildcard '*' dikombinasikan dengan credentials:true membuat browser bisa mengirim cookie/kredensial dari domain manapun — sesuatu yang seharusnya dibatasi ketat.",
+      fixOptions:[
+        "app.use(cors({ origin: \"*\" }));",
+        "app.use(cors({ origin: [\"https://app.contoh.com\"], credentials: true }));",
+        "app.use(cors({ origin: \"*\", credentials: false, methods: [\"GET\"] }));"
+      ],
+      fixCorrect:1,
+      fixWhy:"Menentukan daftar origin yang diizinkan secara eksplisit (allowlist) memastikan hanya domain tepercaya yang bisa membuat request lintas domain dengan kredensial, bukan sembarang situs di internet.",
+      simPayload:"Request dari situs-jahat.com dengan credentials: 'include'",
+      simBefore:"Browser tetap mengizinkan request itu membawa cookie sesi korban, dan server membalas dengan header yang mengizinkan origin manapun — situs-jahat.com berhasil membaca data akun korban.",
+      simAfter:"Origin situs-jahat.com tidak ada dalam daftar yang diizinkan — browser memblokir response sebelum sempat dibaca oleh situs-jahat.com."
+    },
+    {
+      category:"Predictable Session Token",
+      codeLabel:"session.js",
+      lines:[
+        "function generateSessionId() {",
+        "  return Math.random().toString(36).substring(2);",
+        "}"
+      ],
+      vulnLines:[1],
+      attackerNote:"Penyerang yang tahu sebuah sistem memakai generator acak biasa (bukan kriptografis) untuk token/session akan mencoba menganalisis pola dari beberapa token yang berhasil ia amati, untuk memprediksi token pengguna lain.",
+      diagOptions:["Predictable Session Token","SQL Injection","CSRF","Formjacking"],
+      diagCorrect:0,
+      diagWhy:"Math.random() bukan generator acak yang aman secara kriptografis — hasilnya berpotensi diprediksi, sehingga session ID bisa ditebak.",
+      fixOptions:[
+        "return Math.random().toString(36).substring(2) + Date.now();",
+        "return crypto.randomUUID();",
+        "return btoa(Math.random().toString());"
+      ],
+      fixCorrect:1,
+      fixWhy:"crypto.randomUUID() (atau crypto.getRandomValues()) memakai generator acak kriptografis yang dirancang khusus supaya hasilnya tidak bisa diprediksi, cocok untuk apa pun yang berkaitan dengan keamanan seperti session ID atau token.",
+      simPayload:"Menebak ribuan kemungkinan session ID berurutan",
+      simBefore:"Karena polanya berasal dari Math.random() yang bisa dianalisis, penyerang berhasil menemukan session ID pengguna lain yang valid dalam waktu singkat.",
+      simAfter:"crypto.randomUUID() menghasilkan ruang kemungkinan yang sangat luas dan tidak berpola — menebak satu ID valid secara praktis mustahil dalam waktu wajar."
+    },
+    {
+      category:"Path Traversal",
+      codeLabel:"download.js",
+      lines:[
+        "app.get('/download', (req, res) => {",
+        "  res.sendFile('./files/' + req.query.name);",
+        "});"
+      ],
+      vulnLines:[1],
+      attackerNote:"Penyerang mencoba mengganti parameter nama file dengan pola '../' berulang untuk 'naik' keluar dari folder yang dimaksud, berharap bisa membaca file sensitif lain di server seperti file konfigurasi.",
+      diagOptions:["Path Traversal","Command Injection","Mass Assignment","Clickjacking"],
+      diagCorrect:0,
+      diagWhy:"Nama file dari query digabung langsung ke path tanpa validasi, sehingga pola '../' bisa dipakai keluar dari folder files.",
+      fixOptions:[
+        "res.sendFile('./files/' + req.query.name.toLowerCase());",
+        "res.sendFile(path.join('./files', path.basename(req.query.name)));",
+        "res.sendFile('./files/' + req.query.name.replace('..', ''));"
+      ],
+      fixCorrect:1,
+      fixWhy:"path.basename() mengambil hanya nama file tanpa komponen direktori apa pun, sehingga input seperti path ke file lain otomatis terpotong jadi nama file biasa dan tidak bisa lagi keluar dari folder yang diizinkan.",
+      simPayload:"../../../.env",
+      simBefore:"Path akhir yang diakses server keluar dari folder files dan berhasil membaca file .env — isi kredensial database ikut terbaca penyerang.",
+      simAfter:"Input dipotong jadi hanya nama file \".env\" tanpa komponen direktori — file itu tidak ditemukan di folder files, request ditolak dengan 404."
+    },
+    {
+      category:"Missing Signature Verification",
+      codeLabel:"auth_token.js",
+      lines:[
+        "function verifyToken(token) {",
+        "  const decoded = jwt.decode(token);",
+        "  return decoded;",
+        "}"
+      ],
+      vulnLines:[1],
+      attackerNote:"Penyerang mencoba membuat token JWT palsu berisi klaim yang menguntungkan mereka (misalnya role:'admin'). Kalau server hanya membaca isi token tanpa memverifikasi tanda tangannya, token palsu itu akan tetap dipercaya.",
+      diagOptions:["Missing Signature Verification","Race Condition","Formjacking","SSRF"],
+      diagCorrect:0,
+      diagWhy:"jwt.decode() hanya membaca isi token tanpa memverifikasi tanda tangannya — token apa pun yang formatnya benar akan diterima meski dipalsukan.",
+      fixOptions:[
+        "const decoded = jwt.decode(token, { complete: true });",
+        "const decoded = jwt.verify(token, SECRET_KEY);",
+        "const decoded = JSON.parse(atob(token.split('.')[1]));"
+      ],
+      fixCorrect:1,
+      fixWhy:"jwt.verify() memeriksa tanda tangan token menggunakan kunci rahasia server sebelum mempercayai isinya — token yang tanda tangannya tidak cocok (termasuk yang dipalsukan) akan otomatis ditolak.",
+      simPayload:"Token JWT buatan sendiri berisi { role: \"admin\" }",
+      simBefore:"Server menerima token itu apa adanya tanpa mengecek tanda tangan — penyerang langsung mendapat akses sebagai admin.",
+      simAfter:"jwt.verify() menolak token karena tanda tangannya tidak cocok dengan kunci rahasia server — request ditolak dengan status unauthorized."
+    },
+    {
+      category:"Race Condition (TOCTOU)",
+      codeLabel:"voucher.js",
+      lines:[
+        "if (voucher.balance > 0) {",
+        "  await sleep(50);",
+        "  voucher.balance -= amount;",
+        "  await save(voucher);",
+        "}"
+      ],
+      vulnLines:[0,1,2],
+      attackerNote:"Penyerang mengirim banyak request yang sama secara nyaris bersamaan (misalnya redeem voucher berkali-kali dalam hitungan milidetik), berharap sistem sempat memproses beberapa di antaranya sebelum saldo/stoknya diperbarui.",
+      diagOptions:["Race Condition (TOCTOU)","Mass Assignment","XSS","SSRF"],
+      diagCorrect:0,
+      diagWhy:"Ada jeda antara pengecekan saldo dan pengurangannya — request lain yang datang di jeda itu bisa ikut lolos pengecekan sebelum saldo diperbarui.",
+      fixOptions:[
+        "if (voucher.balance > 0) { await sleep(10); voucher.balance -= amount; await save(voucher); }",
+        "await Voucher.decrement('balance', { by: amount, where: { id: voucher.id, balance: { gte: amount } } });",
+        "voucher.balance -= amount; if (voucher.balance > 0) { await save(voucher); }"
+      ],
+      fixCorrect:1,
+      fixWhy:"Melakukan pengecekan dan pengurangan dalam satu operasi database yang atomik (dengan kondisi WHERE) memastikan tidak ada request lain yang bisa 'menyelinap' di antara pengecekan dan penulisan data.",
+      simPayload:"50 request redeem voucher dikirim bersamaan dalam 1 detik",
+      simBefore:"Karena ada jeda sebelum saldo diperbarui, belasan request sama-sama lolos pengecekan sebelum sempat tercatat — voucher berhasil dipakai berkali-kali melebihi saldo aslinya.",
+      simAfter:"Operasi atomik memastikan hanya request pertama yang berhasil mengurangi saldo — request lainnya otomatis gagal karena saldo sudah tidak mencukupi."
+    },
+    {
+      category:"Mass Assignment",
+      codeLabel:"register.js",
+      lines:[
+        "app.post('/register', (req, res) => {",
+        "  const newUser = new User(req.body);",
+        "  newUser.save();",
+        "});"
+      ],
+      vulnLines:[1],
+      attackerNote:"Penyerang mencoba menambahkan field ekstra di body request (di luar yang ditampilkan form) untuk melihat apakah field itu ikut tersimpan — misalnya menyisipkan role:'admin' saat mendaftar akun baru.",
+      diagOptions:["Mass Assignment","Insecure Deserialization","Clickjacking","Command Injection"],
+      diagCorrect:0,
+      diagWhy:"Seluruh isi req.body diteruskan mentah-mentah ke model User, termasuk field yang seharusnya tidak boleh diisi pengguna seperti role.",
+      fixOptions:[
+        "const newUser = new User(JSON.stringify(req.body));",
+        "const { name, email, password } = req.body; const newUser = new User({ name, email, password });",
+        "const newUser = new User(req.body); newUser.role = 'user';"
+      ],
+      fixCorrect:1,
+      fixWhy:"Mengambil (whitelist) hanya field yang memang boleh diisi dari input pengguna memastikan field sensitif seperti role tidak akan pernah bisa disuntikkan lewat request, apa pun isi body yang dikirim.",
+      simPayload:"{ name: \"eve\", email: \"eve@mail.com\", password: \"123\", role: \"admin\" }",
+      simBefore:"Field role:\"admin\" ikut tersimpan apa adanya — akun baru langsung punya hak akses admin penuh sejak pertama mendaftar.",
+      simAfter:"Hanya name, email, dan password yang diambil dari body — field role diabaikan sepenuhnya, akun baru dibuat dengan hak akses default biasa."
+    }
+  ];
+
+  var LS_HIGHSCORES = "cybersec_quiz_highscores_v2";
+  var LS_JT_COUNT = "cybersec_quiz_jamterbang_count";
+  var STAGE_SIZE = 10;
+
+  var state = {
+    mode:"belajar",
+    sessionQuestions:[],
+    isFullSession:true,
+    sessionLabel:"",
+    sessionNoteText:"",
+    missedQuestions:[],
+    idx:0,
+    correctCount:0,
+    answers:[],
+    timer:null,
+    timeLeft:0,
+    timeLimit:0,
+    locked:false,
+    hintShown:false,
+    practiceIndex:0,
+    practiceStage:"locate",
+    practiceAnswers:[],
+    practiceLocked:false,
+    jalur:"lengkap"
+  };
+
+  var els = {};
+  function q(id){ return document.getElementById(id); }
+
+  function getTimeLimit(item){
+    var base = item.type === "code" ? 30 : 18;
+    if(item.difficulty === "menengah") base += 5;
+    if(item.difficulty === "lanjutan") base += 10;
+    return base;
+  }
+
+  function updateThemeIcon(){
+    var current = document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+    els.btnTheme.textContent = current === "light" ? "🌙" : "☀";
+    els.btnTheme.setAttribute("aria-label", current === "light" ? "Beralih ke mode gelap" : "Beralih ke mode terang");
+  }
+
+  function init(){
+    els.boot = q("boot");
+    els.startContent = q("startContent");
+    els.statHighScore = q("statHighScore");
+    els.statLastScore = q("statLastScore");
+    els.statTotalQ = q("statTotalQ");
+    els.btnStart = q("btnStart");
+    els.btnResetScore = q("btnResetScore");
+    els.leaderboardPanel = q("leaderboardPanel");
+    els.leaderboardBody = q("leaderboardBody");
+    els.modeSelect = q("modeSelect");
+    els.jalurSelect = q("jalurSelect");
+    els.jtCounterLabel = q("jtCounterLabel");
+
+    els.progressLabel = q("progressLabel");
+    els.progressDots = q("progressDots");
+    els.timerZone = q("timerZone");
+    els.timerFill = q("timerFill");
+    els.timerCaption = q("timerCaption");
+    els.belajarFlag = q("belajarFlag");
+    els.btnHint = q("btnHint");
+    els.hintBox = q("hintBox");
+    els.hintText = q("hintText");
+    els.qTypeTag = q("qTypeTag");
+    els.qDiffTag = q("qDiffTag");
+    els.qText = q("qText");
+    els.qCodeBlock = q("qCodeBlock");
+    els.qCodeLabel = q("qCodeLabel");
+    els.qCode = q("qCode");
+    els.qOptions = q("qOptions");
+    els.qFeedback = q("qFeedback");
+    els.fbTag = q("fbTag");
+    els.fbWhy = q("fbWhy");
+    els.fbTakeaway = q("fbTakeaway");
+    els.btnNext = q("btnNext");
+
+    els.stageEyebrow = q("stageEyebrow");
+    els.stageScoreCorrect = q("stageScoreCorrect");
+    els.stageScoreTotal = q("stageScoreTotal");
+    els.stageRemaining = q("stageRemaining");
+    els.stageReviewBody = q("stageReviewBody");
+    els.btnStageContinue = q("btnStageContinue");
+    els.btnStageStop = q("btnStageStop");
+
+    els.practiceLabel = q("practiceLabel");
+    els.practiceProgressLabel = q("practiceProgressLabel");
+    els.practiceProgressDots = q("practiceProgressDots");
+    els.pstagePill0 = q("pstagePill0");
+    els.pstagePill1 = q("pstagePill1");
+    els.pstagePill2 = q("pstagePill2");
+    els.practiceCategoryTag = q("practiceCategoryTag");
+    els.practiceStageBody = q("practiceStageBody");
+    els.btnPracticeNext = q("btnPracticeNext");
+
+    els.ptResScoreCorrect = q("ptResScoreCorrect");
+    els.ptResScoreTotal = q("ptResScoreTotal");
+    els.ptResRank = q("ptResRank");
+    els.ptResStatus = q("ptResStatus");
+    els.practiceReviewBody = q("practiceReviewBody");
+    els.btnPracticeRetry = q("btnPracticeRetry");
+    els.btnPracticeHome = q("btnPracticeHome");
+
+    els.resScoreCorrect = q("resScoreCorrect");
+    els.resScoreTotal = q("resScoreTotal");
+    els.resRank = q("resRank");
+    els.resStatus = q("resStatus");
+    els.resNewRecord = q("resNewRecord");
+    els.resSessionNote = q("resSessionNote");
+    els.certEyebrow = q("certEyebrow");
+    els.reviewBody = q("reviewBody");
+    els.btnRetry = q("btnRetry");
+    els.btnRetryMissed = q("btnRetryMissed");
+    els.btnHome = q("btnHome");
+
+    els.btnGuide = q("btnGuide");
+    els.guideModal = q("guideModal");
+    els.btnCloseGuide = q("btnCloseGuide");
+    els.btnTheme = q("btnTheme");
+
+    els.statTotalQ.textContent = QUESTIONS.length;
+
+    var modeCards = els.modeSelect.querySelectorAll(".mode-card");
+    modeCards.forEach(function(card){
+      card.addEventListener("click", function(){
+        modeCards.forEach(function(c){ c.classList.remove("active"); });
+        card.classList.add("active");
+        state.mode = card.getAttribute("data-mode");
+        els.jalurSelect.style.display = (state.mode === "jamterbang") ? "none" : "flex";
+      });
+    });
+
+    var jalurChips = els.jalurSelect.querySelectorAll(".jalur-chip");
+    jalurChips.forEach(function(chip){
+      chip.addEventListener("click", function(){
+        jalurChips.forEach(function(c){ c.classList.remove("active"); });
+        chip.classList.add("active");
+        state.jalur = chip.getAttribute("data-jalur");
+        var count = state.jalur === "lengkap" ? QUESTIONS.length : QUESTIONS.filter(function(q){ return q.difficulty === state.jalur; }).length;
+        els.statTotalQ.textContent = count;
+      });
+    });
+
+    els.btnStart.addEventListener("click", function(){
+      if(state.mode === "jamterbang"){ startPractice(); }
+      else {
+        var list = (state.jalur === "lengkap") ? null : QUESTIONS.filter(function(q){ return q.difficulty === state.jalur; });
+        startQuiz(list, true);
+      }
+    });
+    els.btnPracticeNext.addEventListener("click", goPracticeNext);
+    els.btnPracticeRetry.addEventListener("click", startPractice);
+    els.btnPracticeHome.addEventListener("click", function(){ showScreen("start"); renderStart(); });
+    els.btnResetScore.addEventListener("click", resetHighScores);
+    els.btnNext.addEventListener("click", goNext);
+    els.btnRetry.addEventListener("click", function(){ startQuiz(state.sessionQuestions, state.isFullSession); });
+    els.btnRetryMissed.addEventListener("click", function(){ startQuiz(state.missedQuestions, false); });
+    els.btnHome.addEventListener("click", function(){ showScreen("start"); renderStart(); });
+    els.btnStageContinue.addEventListener("click", function(){
+      state.idx++;
+      showScreen("quiz");
+      renderQuestion();
+    });
+    els.btnStageStop.addEventListener("click", stopSessionEarly);
+    bindReviewToggle(els.reviewBody);
+    bindReviewToggle(els.stageReviewBody);
+    bindReviewToggle(els.practiceReviewBody);
+    els.btnHint.addEventListener("click", function(){
+      state.hintShown = true;
+      els.hintBox.classList.add("show");
+    });
+    updateThemeIcon();
+    els.btnTheme.addEventListener("click", function(){
+      var current = document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+      var next = current === "light" ? "dark" : "light";
+      document.documentElement.setAttribute("data-theme", next);
+      try{ localStorage.setItem("cybersec_quiz_theme", next); }catch(e){}
+      updateThemeIcon();
+    });
+
+    els.btnGuide.addEventListener("click", function(){ els.guideModal.classList.add("show"); });
+    els.btnCloseGuide.addEventListener("click", function(){ els.guideModal.classList.remove("show"); });
+    els.guideModal.addEventListener("click", function(e){ if(e.target === els.guideModal){ els.guideModal.classList.remove("show"); } });
+
+    var tabBtns = document.querySelectorAll(".tab-btn");
+    for(var i=0;i<tabBtns.length;i++){
+      tabBtns[i].addEventListener("click", function(e){
+        var tab = e.currentTarget.getAttribute("data-tab");
+        document.querySelectorAll(".tab-btn").forEach(function(b){ b.classList.remove("active"); });
+        document.querySelectorAll(".tab-panel").forEach(function(p){ p.classList.remove("active"); });
+        e.currentTarget.classList.add("active");
+        document.querySelector('.tab-panel[data-panel="'+tab+'"]').classList.add("active");
+      });
+    }
+
+    document.addEventListener("keydown", function(e){
+      if(!document.getElementById("screen-quiz").classList.contains("active")) return;
+      if(state.locked) return;
+      var n = parseInt(e.key, 10);
+      if(n >= 1 && n <= 4){
+        var opts = els.qOptions.querySelectorAll(".option");
+        if(opts[n-1]) opts[n-1].click();
+      }
+    });
+
+    runBoot();
+  }
+
+  function runBoot(){
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var lines = [
+      "> menginisialisasi sistem audit keamanan...",
+      "> memindai kerentanan dari level dasar sampai lanjutan...",
+      "> memuat bank soal [" + QUESTIONS.length + " entri terenkripsi]...",
+      "> status: SIAP."
+    ];
+    if(reduce){
+      els.boot.textContent = lines.join("\n");
+      revealStart();
+      return;
+    }
+    var li = 0, ci = 0;
+    els.boot.innerHTML = "";
+    var current = document.createElement("div");
+    els.boot.appendChild(current);
+
+    function typeNext(){
+      if(li >= lines.length){
+        var cursor = document.createElement("span");
+        cursor.className = "cursor";
+        current.appendChild(cursor);
+        setTimeout(revealStart, 500);
+        return;
+      }
+      var line = lines[li];
+      if(ci <= line.length){
+        current.textContent = line.slice(0, ci);
+        ci++;
+        setTimeout(typeNext, 10);
+      } else {
+        li++; ci = 0;
+        current = document.createElement("div");
+        els.boot.appendChild(current);
+        setTimeout(typeNext, 140);
+      }
+    }
+    typeNext();
+  }
+
+  function revealStart(){
+    els.startContent.style.display = "block";
+    renderStart();
+  }
+
+  function getHighScores(){
+    try{
+      var raw = localStorage.getItem(LS_HIGHSCORES);
+      return raw ? JSON.parse(raw) : [];
+    }catch(e){ return []; }
+  }
+
+  function saveHighScore(entry){
+    var list = getHighScores();
+    list.push(entry);
+    list.sort(function(a,b){
+      if(b.percent !== a.percent) return b.percent - a.percent;
+      return b.correct - a.correct;
+    });
+    list = list.slice(0, 5);
+    localStorage.setItem(LS_HIGHSCORES, JSON.stringify(list));
+    return list;
+  }
+
+  function resetHighScores(){
+    localStorage.removeItem(LS_HIGHSCORES);
+    renderStart();
+  }
+
+  function renderStart(){
+    updateJtCounterLabel();
+    var list = getHighScores();
+    if(list.length){
+      els.statHighScore.textContent = list[0].percent + "%";
+      els.statLastScore.textContent = list[0].correct + "/" + list[0].total;
+    } else {
+      els.statHighScore.textContent = "0%";
+      els.statLastScore.textContent = "Belum ada";
+    }
+
+    if(list.length === 0){
+      els.leaderboardPanel.style.display = "none";
+      return;
+    }
+    els.leaderboardPanel.style.display = "block";
+    var medals = ["🥇","🥈","🥉","4.","5."];
+    var html = '<table><thead><tr><th>#</th><th>Skor</th><th>Persentase</th><th>Mode</th><th>Tanggal</th></tr></thead><tbody>';
+    var jalurNames = {dasar:"Fondasi", menengah:"Menengah", lanjutan:"Lanjutan", lengkap:"Lengkap"};
+    for(var i=0;i<list.length;i++){
+      var e = list[i];
+      var modeLabel = e.mode === "tantangan" ? "Tantangan" : "Belajar";
+      var jalurLabel = jalurNames[e.jalur] || "Lengkap";
+      var combinedLabel = modeLabel + (jalurLabel !== "Lengkap" ? (" · " + jalurLabel) : "");
+      html += '<tr><td class="rank-medal">'+medals[i]+'</td><td>'+e.correct+'/'+e.total+'</td><td>'+e.percent+'%</td><td class="mode-pill">'+combinedLabel+'</td><td>'+e.date+'</td></tr>';
+    }
+    html += '</tbody></table>';
+    els.leaderboardBody.innerHTML = html;
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  function getJtCount(){
+    try{
+      var raw = localStorage.getItem(LS_JT_COUNT);
+      return raw ? parseInt(raw, 10) || 0 : 0;
+    }catch(e){ return 0; }
+  }
+
+  function addJtCount(n){
+    try{ localStorage.setItem(LS_JT_COUNT, String(getJtCount() + n)); }catch(e){}
+  }
+
+  function updateJtCounterLabel(){
+    var count = getJtCount();
+    els.jtCounterLabel.textContent = count > 0 ? ("Sudah berlatih: " + count + " soal") : "";
+  }
+
+  function startPractice(){
+    state.practiceIndex = 0;
+    state.practiceStage = "locate";
+    state.practiceAnswers = [];
+    showScreen("practice");
+    renderPracticeProgress();
+    renderPracticeStage();
+  }
+
+  function renderPracticeProgress(){
+    els.practiceProgressLabel.textContent = "Latihan " + (state.practiceIndex+1) + " / " + PRACTICE_ITEMS.length;
+    var html = "";
+    for(var i=0;i<PRACTICE_ITEMS.length;i++){
+      var cls = "pdot";
+      var a = state.practiceAnswers[i];
+      if(a){
+        var allCorrect = a.locateCorrect && a.diagnoseCorrect && a.fixCorrect;
+        cls += allCorrect ? " done-correct" : " done-wrong";
+      } else if(i === state.practiceIndex){
+        cls += " current";
+      }
+      html += '<span class="'+cls+'"></span>';
+    }
+    els.practiceProgressDots.innerHTML = html;
+  }
+
+  function updateStagePills(){
+    var stages = ["locate","diagnose","fix"];
+    var pills = [els.pstagePill0, els.pstagePill1, els.pstagePill2];
+    var currentIdx = stages.indexOf(state.practiceStage);
+    for(var i=0;i<pills.length;i++){
+      pills[i].className = "pstage-pill" + (i < currentIdx ? " done" : (i === currentIdx ? " active" : ""));
+    }
+  }
+
+  function renderPracticeStage(){
+    var item = PRACTICE_ITEMS[state.practiceIndex];
+    state.practiceLocked = false;
+    els.practiceLabel.textContent = "jam_terbang.sh — " + item.codeLabel;
+    els.practiceCategoryTag.textContent = item.category;
+    els.btnPracticeNext.style.display = "none";
+    updateStagePills();
+    renderPracticeProgress();
+
+    if(state.practiceStage === "locate") renderLocateStage(item);
+    else if(state.practiceStage === "diagnose") renderDiagnoseStage(item);
+    else renderFixStage(item);
+  }
+
+  function renderLocateStage(item){
+    var linesHtml = "";
+    for(var i=0;i<item.lines.length;i++){
+      linesHtml += '<button class="code-line" type="button" data-line="'+i+'">' +
+                      '<span class="cl-num">'+(i+1)+'</span>' +
+                      '<span class="cl-text">'+escapeHtml(item.lines[i] || " ")+'</span>' +
+                    '</button>';
+    }
+    els.practiceStageBody.innerHTML =
+      '<div class="q-text">Klik baris kode yang menurutmu jadi sumber utama celah keamanan.</div>' +
+      '<div class="code-block">' +
+        '<div class="cb-head">📄 '+item.codeLabel+'</div>' +
+        '<div class="code-lines" id="codeLinesContainer">'+linesHtml+'</div>' +
+      '</div>' +
+      '<div class="feedback" id="locateFeedback"></div>';
+
+    var lineEls = els.practiceStageBody.querySelectorAll(".code-line");
+    lineEls.forEach(function(btn){
+      btn.addEventListener("click", function(e){
+        var idx = parseInt(e.currentTarget.getAttribute("data-line"), 10);
+        submitLocate(idx);
+      });
+    });
+  }
+
+  function submitLocate(chosenLine){
+    if(state.practiceLocked) return;
+    state.practiceLocked = true;
+    var item = PRACTICE_ITEMS[state.practiceIndex];
+    var isCorrect = item.vulnLines.indexOf(chosenLine) !== -1;
+
+    if(!state.practiceAnswers[state.practiceIndex]){
+      state.practiceAnswers[state.practiceIndex] = {};
+    }
+    state.practiceAnswers[state.practiceIndex].chosenLine = chosenLine;
+    state.practiceAnswers[state.practiceIndex].locateCorrect = isCorrect;
+
+    var lineEls = els.practiceStageBody.querySelectorAll(".code-line");
+    lineEls.forEach(function(btn, i){
+      btn.disabled = true;
+      if(item.vulnLines.indexOf(i) !== -1) btn.classList.add("correct");
+      else if(i === chosenLine) btn.classList.add("wrong");
+    });
+
+    var fb = q("locateFeedback");
+    fb.className = "feedback show " + (isCorrect ? "correct" : "wrong");
+    fb.innerHTML = '<span class="fb-tag">'+(isCorrect ? "Tepat" : "Kurang tepat")+'</span>' +
+                    '<div class="attacker-note"><span class="an-label">Sudut pandang penyerang</span>'+item.attackerNote+'</div>';
+
+    els.btnPracticeNext.style.display = "inline-block";
+    els.btnPracticeNext.textContent = "Lanjut ke Diagnosis →";
+  }
+
+  function renderDiagnoseStage(item){
+    var html = "";
+    for(var i=0;i<item.diagOptions.length;i++){
+      html += '<button class="option" type="button" data-idx="'+i+'">' +
+                '<span class="opt-key">'+(i+1)+'</span><span>'+item.diagOptions[i]+'</span>' +
+              '</button>';
+    }
+    els.practiceStageBody.innerHTML =
+      '<div class="q-text">Berdasarkan baris yang kamu temukan, apa jenis kerentanan ini?</div>' +
+      '<div class="options" id="diagOptionsContainer">'+html+'</div>' +
+      '<div class="feedback" id="diagnoseFeedback"></div>';
+
+    var optionEls = els.practiceStageBody.querySelectorAll(".option");
+    optionEls.forEach(function(btn){
+      btn.addEventListener("click", function(e){
+        var idx = parseInt(e.currentTarget.getAttribute("data-idx"), 10);
+        submitDiagnose(idx);
+      });
+    });
+  }
+
+  function submitDiagnose(chosenIdx){
+    if(state.practiceLocked) return;
+    state.practiceLocked = true;
+    var item = PRACTICE_ITEMS[state.practiceIndex];
+    var isCorrect = chosenIdx === item.diagCorrect;
+
+    state.practiceAnswers[state.practiceIndex].chosenDiag = chosenIdx;
+    state.practiceAnswers[state.practiceIndex].diagnoseCorrect = isCorrect;
+
+    var optionEls = els.practiceStageBody.querySelectorAll(".option");
+    optionEls.forEach(function(btn, i){
+      btn.disabled = true;
+      if(i === item.diagCorrect) btn.classList.add("correct");
+      else if(i === chosenIdx) btn.classList.add("wrong");
+    });
+
+    var fb = q("diagnoseFeedback");
+    fb.className = "feedback show " + (isCorrect ? "correct" : "wrong");
+    fb.innerHTML = '<span class="fb-tag">'+(isCorrect ? "Benar" : "Kurang tepat")+'</span>' +
+                    '<div class="fb-block"><b>Kenapa begini</b><span>'+item.diagWhy+'</span></div>';
+
+    els.btnPracticeNext.style.display = "inline-block";
+    els.btnPracticeNext.textContent = "Lanjut ke Perbaikan →";
+  }
+
+  function renderFixStage(item){
+    var html = "";
+    for(var i=0;i<item.fixOptions.length;i++){
+      html += '<button class="option fix-option" type="button" data-idx="'+i+'">' +
+                '<span class="fix-option-label"><span class="opt-key">'+(i+1)+'</span><span>Opsi Perbaikan '+(i+1)+'</span></span>' +
+                '<pre>'+escapeHtml(item.fixOptions[i])+'</pre>' +
+              '</button>';
+    }
+    els.practiceStageBody.innerHTML =
+      '<div class="q-text">Mana perbaikan kode yang paling tepat untuk celah ini?</div>' +
+      '<div class="options" id="fixOptionsContainer">'+html+'</div>' +
+      '<div class="feedback" id="fixFeedback"></div>';
+
+    var optionEls = els.practiceStageBody.querySelectorAll(".fix-option");
+    optionEls.forEach(function(btn){
+      btn.addEventListener("click", function(e){
+        var idx = parseInt(e.currentTarget.getAttribute("data-idx"), 10);
+        submitFix(idx);
+      });
+    });
+  }
+
+  function submitFix(chosenIdx){
+    if(state.practiceLocked) return;
+    state.practiceLocked = true;
+    var item = PRACTICE_ITEMS[state.practiceIndex];
+    var isCorrect = chosenIdx === item.fixCorrect;
+
+    state.practiceAnswers[state.practiceIndex].chosenFix = chosenIdx;
+    state.practiceAnswers[state.practiceIndex].fixCorrect = isCorrect;
+
+    var optionEls = els.practiceStageBody.querySelectorAll(".fix-option");
+    optionEls.forEach(function(btn, i){
+      btn.disabled = true;
+      if(i === item.fixCorrect) btn.classList.add("correct");
+      else if(i === chosenIdx) btn.classList.add("wrong");
+    });
+
+    var fb = q("fixFeedback");
+    fb.className = "feedback show " + (isCorrect ? "correct" : "wrong");
+    fb.innerHTML = '<span class="fb-tag">'+(isCorrect ? "Perbaikan tepat" : "Belum tepat")+'</span>' +
+                    '<div class="fb-block"><b>Kenapa begini</b><span>'+item.fixWhy+'</span></div>' +
+                    '<button class="btn btn-amber btn-sm" id="btnShowSim" type="button" style="margin-top:10px;">▶ Simulasikan Serangan</button>' +
+                    '<div class="sim-panel" id="simPanel" style="display:none;">' +
+                      '<div class="sim-payload-row">Payload yang dicoba:<code>'+escapeHtml(item.simPayload)+'</code></div>' +
+                      '<div class="sim-outcome sim-before"><span class="sim-tag">❌ Kode Rentan</span>'+item.simBefore+'</div>' +
+                      '<div class="sim-outcome sim-after"><span class="sim-tag">✅ Kode Diperbaiki</span>'+item.simAfter+'</div>' +
+                    '</div>';
+
+    var simBtn = q("btnShowSim");
+    simBtn.addEventListener("click", function(){
+      var panel = q("simPanel");
+      var showing = panel.style.display !== "none";
+      panel.style.display = showing ? "none" : "block";
+      simBtn.textContent = showing ? "▶ Simulasikan Serangan" : "▲ Sembunyikan Simulasi";
+    });
+
+    els.btnPracticeNext.style.display = "inline-block";
+    els.btnPracticeNext.textContent = (state.practiceIndex === PRACTICE_ITEMS.length - 1) ? "Lihat Laporan →" : "Soal Berikutnya →";
+    updateStagePills();
+    q("pstagePill2").className = "pstage-pill done";
+  }
+
+  function goPracticeNext(){
+    if(state.practiceStage === "locate"){
+      state.practiceStage = "diagnose";
+      renderPracticeStage();
+    } else if(state.practiceStage === "diagnose"){
+      state.practiceStage = "fix";
+      renderPracticeStage();
+    } else {
+      addJtCount(1);
+      if(state.practiceIndex < PRACTICE_ITEMS.length - 1){
+        state.practiceIndex++;
+        state.practiceStage = "locate";
+        renderPracticeStage();
+      } else {
+        finishPractice();
+      }
+    }
+  }
+
+  function finishPractice(){
+    var totalSteps = PRACTICE_ITEMS.length * 3;
+    var correctSteps = 0;
+    for(var i=0;i<state.practiceAnswers.length;i++){
+      var a = state.practiceAnswers[i];
+      if(!a) continue;
+      if(a.locateCorrect) correctSteps++;
+      if(a.diagnoseCorrect) correctSteps++;
+      if(a.fixCorrect) correctSteps++;
+    }
+    var percent = Math.round((correctSteps/totalSteps)*100);
+    var rank = getRank(percent);
+
+    els.ptResScoreCorrect.textContent = correctSteps;
+    els.ptResScoreTotal.textContent = totalSteps;
+    els.ptResRank.textContent = "TINGKAT AKSES: " + rank.label;
+    els.ptResStatus.textContent = rank.pass ? "Lulus" : "Perlu Latihan Lagi";
+    els.ptResStatus.className = "cert-status " + (rank.pass ? "pass" : "fail");
+
+    renderPracticeReview();
+    showScreen("practice-result");
+  }
+
+  function renderPracticeReview(){
+    var html = "";
+    for(var i=0;i<PRACTICE_ITEMS.length;i++){
+      var item = PRACTICE_ITEMS[i];
+      var a = state.practiceAnswers[i] || {};
+      var allCorrect = a.locateCorrect && a.diagnoseCorrect && a.fixCorrect;
+      var expandedCls = allCorrect ? "" : " expanded";
+      var chevron = allCorrect ? "▸" : "▾";
+
+      var subBadges =
+        '<span class="review-badge '+(a.locateCorrect?'correct':'wrong')+'" title="Temukan">T</span>' +
+        '<span class="review-badge '+(a.diagnoseCorrect?'correct':'wrong')+'" title="Diagnosis">D</span>' +
+        '<span class="review-badge '+(a.fixCorrect?'correct':'wrong')+'" title="Perbaiki">P</span>';
+
+      html += '<div class="review-item">' +
+                '<button class="review-head" type="button">' +
+                  '<span style="display:flex; gap:4px;">'+subBadges+'</span>' +
+                  '<span class="review-q">'+(i+1)+'. '+item.category+'</span>' +
+                  '<span class="review-chevron">'+chevron+'</span>' +
+                '</button>' +
+                '<div class="review-detail'+expandedCls+'">' +
+                  '<span class="rd-label">Temukan:</span> baris '+((a.chosenLine!==undefined ? (a.chosenLine+1) : "—"))+' dipilih — '+(a.locateCorrect?'tepat':('seharusnya baris '+item.vulnLines.map(function(n){return n+1;}).join('/')))+'<br>' +
+                  '<span class="rd-label">Diagnosis:</span> '+item.diagWhy+'<br>' +
+                  '<span class="rd-label">Perbaikan:</span> '+item.fixWhy +
+                '</div>' +
+              '</div>';
+    }
+    els.practiceReviewBody.innerHTML = html;
+  }
+
+  function showScreen(name){
+    document.querySelectorAll(".screen").forEach(function(s){ s.classList.remove("active"); });
+    q("screen-"+name).classList.add("active");
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+
+  function startQuiz(list, isFull){
+    state.sessionQuestions = (list && list.length) ? list.slice() : QUESTIONS.slice();
+    state.isFullSession = (typeof isFull === "boolean") ? isFull : true;
+    state.sessionLabel = "";
+    state.sessionNoteText = "";
+    state.idx = 0;
+    state.correctCount = 0;
+    state.answers = [];
+    state.missedQuestions = [];
+    showScreen("quiz");
+    renderProgressDots();
+    renderQuestion();
+  }
+
+  function renderProgressDots(){
+    var html = "";
+    for(var i=0;i<state.sessionQuestions.length;i++){
+      var cls = "pdot";
+      if(state.answers[i]){
+        cls += state.answers[i].isCorrect ? " done-correct" : " done-wrong";
+      } else if(i === state.idx){
+        cls += " current";
+      }
+      html += '<span class="'+cls+'"></span>';
+    }
+    els.progressDots.innerHTML = html;
+  }
+
+  function renderQuestion(){
+    var item = state.sessionQuestions[state.idx];
+    state.locked = false;
+    state.hintShown = false;
+
+    els.progressLabel.textContent = "Soal " + (state.idx+1) + " / " + state.sessionQuestions.length;
+    renderProgressDots();
+
+    els.qTypeTag.className = "q-type-tag " + item.type;
+    els.qTypeTag.textContent = item.type === "code" ? "Kode" : "Teori";
+    els.qDiffTag.className = "q-diff-tag " + item.difficulty;
+    els.qDiffTag.textContent = item.difficulty.charAt(0).toUpperCase() + item.difficulty.slice(1);
+    els.qText.textContent = item.question;
+
+    if(item.type === "code"){
+      els.qCodeBlock.style.display = "block";
+      els.qCodeLabel.textContent = item.codeLabel || "kode.js";
+      els.qCode.textContent = item.code;
+    } else {
+      els.qCodeBlock.style.display = "none";
+    }
+
+    els.hintBox.classList.remove("show");
+    els.hintText.textContent = item.hint || "";
+
+    var html = "";
+    for(var i=0;i<item.options.length;i++){
+      html += '<button class="option" type="button" data-idx="'+i+'">' +
+                '<span class="opt-key">'+(i+1)+'</span><span>'+item.options[i]+'</span>' +
+              '</button>';
+    }
+    els.qOptions.innerHTML = html;
+
+    var optionEls = els.qOptions.querySelectorAll(".option");
+    optionEls.forEach(function(btn){
+      btn.addEventListener("click", function(e){
+        var idx = parseInt(e.currentTarget.getAttribute("data-idx"), 10);
+        submitAnswer(idx);
+      });
+    });
+
+    els.qFeedback.className = "feedback";
+    els.btnNext.style.display = "none";
+
+    clearInterval(state.timer);
+
+    if(state.mode === "tantangan"){
+      els.timerZone.style.display = "block";
+      els.belajarFlag.style.display = "none";
+      state.timeLimit = getTimeLimit(item);
+      state.timeLeft = state.timeLimit;
+      els.timerFill.style.transition = "none";
+      els.timerFill.style.width = "100%";
+      els.timerFill.className = "timer-fill";
+      els.timerCaption.textContent = "Batas waktu: " + state.timeLimit + " detik";
+      void els.timerFill.offsetWidth;
+      state.timer = setInterval(tick, 1000);
+    } else {
+      els.timerZone.style.display = "none";
+      els.belajarFlag.style.display = "flex";
+    }
+  }
+
+  function tick(){
+    state.timeLeft--;
+    var pct = Math.max(0, (state.timeLeft / state.timeLimit) * 100);
+    els.timerFill.style.transition = "width 1s linear, background .3s ease";
+    els.timerFill.style.width = pct + "%";
+    els.timerFill.className = "timer-fill" + (pct <= 25 ? " danger" : pct <= 50 ? " warn" : "");
+    if(state.timeLeft <= 0){
+      clearInterval(state.timer);
+      if(!state.locked) submitAnswer(-1);
+    }
+  }
+
+  function submitAnswer(chosenIdx){
+    if(state.locked) return;
+    state.locked = true;
+    clearInterval(state.timer);
+
+    var item = state.sessionQuestions[state.idx];
+    var isCorrect = chosenIdx === item.correct;
+    if(isCorrect) state.correctCount++;
+
+    state.answers[state.idx] = {chosenIdx:chosenIdx, isCorrect:isCorrect};
+
+    var optionEls = els.qOptions.querySelectorAll(".option");
+    optionEls.forEach(function(btn, i){
+      btn.disabled = true;
+      if(i === item.correct) btn.classList.add("correct");
+      else if(i === chosenIdx) btn.classList.add("wrong");
+    });
+
+    els.qFeedback.className = "feedback show " + (isCorrect ? "correct" : "wrong");
+    els.fbTag.textContent = chosenIdx === -1 ? "Waktu habis" : (isCorrect ? "Benar" : "Kurang tepat");
+    els.fbWhy.textContent = item.why;
+    els.fbTakeaway.textContent = item.takeaway;
+
+    renderProgressDots();
+    els.btnNext.style.display = "inline-block";
+    els.btnNext.textContent = (state.idx === state.sessionQuestions.length - 1) ? "Lihat Hasil →" : "Lanjut →";
+  }
+
+  function goNext(){
+    var isLastOverall = (state.idx === state.sessionQuestions.length - 1);
+    var isStageBoundary = ((state.idx + 1) % STAGE_SIZE === 0);
+
+    if(isLastOverall){
+      finishQuiz();
+      return;
+    }
+    if(isStageBoundary && state.sessionQuestions.length > STAGE_SIZE){
+      showStageReport();
+      return;
+    }
+    state.idx++;
+    renderQuestion();
+  }
+
+  function showStageReport(){
+    var stageIdx = Math.floor(state.idx / STAGE_SIZE);
+    var stageNum = stageIdx + 1;
+    var totalStages = Math.ceil(state.sessionQuestions.length / STAGE_SIZE);
+    var stageStart = stageIdx * STAGE_SIZE;
+    var stageEnd = state.idx;
+
+    var stageCorrect = 0;
+    var html = "";
+    for(var j=stageStart; j<=stageEnd; j++){
+      var ans = state.answers[j] || {chosenIdx:-1, isCorrect:false};
+      if(ans.isCorrect) stageCorrect++;
+      html += reviewItemHtml(state.sessionQuestions[j], ans, j+1);
+    }
+    els.stageReviewBody.innerHTML = html;
+
+    els.stageEyebrow.textContent = "Checkpoint — Stage " + stageNum + " dari " + totalStages;
+    els.stageScoreCorrect.textContent = stageCorrect;
+    els.stageScoreTotal.textContent = (stageEnd - stageStart + 1);
+    els.stageRemaining.textContent = state.sessionQuestions.length - (state.idx + 1);
+
+    showScreen("stage");
+  }
+
+  function stopSessionEarly(){
+    var attemptedCount = state.idx + 1;
+    state.sessionQuestions = state.sessionQuestions.slice(0, attemptedCount);
+    state.isFullSession = false;
+    state.sessionLabel = "Hasil Sementara — Berhenti Lebih Awal";
+    state.sessionNoteText = "Sesi dihentikan sebelum selesai — tidak memengaruhi papan skor";
+    finishQuiz();
+  }
+
+  function getRank(percent){
+    if(percent === 100) return {label:"RED TEAM OPERATOR", pass:true};
+    if(percent >= 80) return {label:"WHITE HAT HACKER", pass:true};
+    if(percent >= 60) return {label:"SECURITY ANALYST", pass:true};
+    if(percent >= 40) return {label:"JUNIOR PENTESTER", pass:false};
+    return {label:"SCRIPT KIDDIE", pass:false};
+  }
+
+  function finishQuiz(){
+    var total = state.sessionQuestions.length;
+    var correct = state.correctCount;
+    var percent = Math.round((correct/total)*100);
+    var rank = getRank(percent);
+
+    state.missedQuestions = [];
+    for(var i=0;i<state.sessionQuestions.length;i++){
+      var a = state.answers[i];
+      if(!a || !a.isCorrect) state.missedQuestions.push(state.sessionQuestions[i]);
+    }
+
+    var isNewRecord = false;
+    if(state.isFullSession){
+      var prevBest = getHighScores()[0];
+      isNewRecord = !prevBest || percent > prevBest.percent || (percent === prevBest.percent && correct > prevBest.correct);
+      var d = new Date();
+      var dateStr = String(d.getDate()).padStart(2,"0") + "/" + String(d.getMonth()+1).padStart(2,"0") + "/" + d.getFullYear();
+      saveHighScore({correct:correct, total:total, percent:percent, date:dateStr, mode:state.mode, jalur:state.jalur});
+    }
+
+    els.certEyebrow.textContent = state.sessionLabel || (state.isFullSession ? "Laporan Audit Selesai" : "Hasil Sesi Latihan Ulang");
+    els.resScoreCorrect.textContent = correct;
+    els.resScoreTotal.textContent = total;
+    els.resRank.textContent = "TINGKAT AKSES: " + rank.label;
+    els.resStatus.textContent = rank.pass ? "Lulus" : "Perlu Latihan Lagi";
+    els.resStatus.className = "cert-status " + (rank.pass ? "pass" : "fail");
+    els.resNewRecord.style.display = isNewRecord ? "block" : "none";
+    els.resSessionNote.style.display = state.isFullSession ? "none" : "block";
+    els.resSessionNote.textContent = state.sessionNoteText || "Sesi latihan ulang — tidak memengaruhi papan skor";
+
+    els.btnRetryMissed.style.display = state.missedQuestions.length > 0 ? "inline-block" : "none";
+    els.btnRetryMissed.textContent = "↻ Latihan Ulang yang Salah (" + state.missedQuestions.length + ")";
+
+    renderReview();
+    showScreen("result");
+  }
+
+  function reviewItemHtml(item, ans, displayNum){
+    var yourText = ans.chosenIdx === -1 ? "Tidak dijawab (waktu habis)" : item.options[ans.chosenIdx];
+    var expandedCls = ans.isCorrect ? "" : " expanded";
+    var chevron = ans.isCorrect ? "▸" : "▾";
+    return '<div class="review-item">' +
+              '<button class="review-head" type="button">' +
+                '<span class="review-badge '+(ans.isCorrect?'correct':'wrong')+'">'+(ans.isCorrect?'✓':'✕')+'</span>' +
+                '<span class="review-q">'+displayNum+'. '+item.question+'</span>' +
+                '<span class="review-chevron">'+chevron+'</span>' +
+              '</button>' +
+              '<div class="review-detail'+expandedCls+'">' +
+                '<span class="rd-label">Jawabanmu:</span> <span class="your-ans">'+yourText+'</span><br>' +
+                (ans.isCorrect ? '' : '<span class="rd-label">Jawaban benar:</span> <span class="correct-ans">'+item.options[item.correct]+'</span><br>') +
+                '<span class="rd-label">Kenapa begini:</span> '+item.why+'<br>' +
+                '<span class="rd-label">Yang perlu diingat:</span> '+item.takeaway +
+              '</div>' +
+            '</div>';
+  }
+
+  function bindReviewToggle(container){
+    container.addEventListener("click", function(e){
+      var head = e.target.closest(".review-head");
+      if(!head) return;
+      var detail = head.nextElementSibling;
+      var isExpanded = detail.classList.toggle("expanded");
+      head.querySelector(".review-chevron").textContent = isExpanded ? "▾" : "▸";
+    });
+  }
+
+  function renderReview(){
+    var html = "";
+    for(var i=0;i<state.sessionQuestions.length;i++){
+      var ans = state.answers[i] || {chosenIdx:-1, isCorrect:false};
+      html += reviewItemHtml(state.sessionQuestions[i], ans, i+1);
+    }
+    els.reviewBody.innerHTML = html;
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
