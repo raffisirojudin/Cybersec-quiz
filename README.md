@@ -1,4 +1,4 @@
-# 🛡️ CELAH — Kuis Temukan Celah Keamanan
+# 🛡️ CyberSec — Kuis Temukan Celah Keamanan
 
 Aplikasi web edukasi interaktif untuk melatih pemahaman **keamanan siber** (cyber security) lewat kuis, latihan code review, dan simulasi serangan — dirancang khusus untuk pemula, bukan ahli keamanan siber.
 
