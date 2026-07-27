@@ -591,7 +591,7 @@
       <div class="panel-body">
 
         <div class="progress-head">
-          <span class="progress-label" id="practiceProgressLabel">Latihan 1 / 10</span>
+          <span class="progress-label" id="practiceProgressLabel">Latihan 1 / 15</span>
           <div class="progress-dots" id="practiceProgressDots"></div>
         </div>
 
@@ -659,7 +659,7 @@
 
     <div class="tab-panel active" data-panel="cara">
       <ol>
-        <li>Ada <strong>30 soal</strong> berupa teori keamanan siber atau potongan kode yang mengandung celah, diurutkan dari tingkat Dasar → Menengah → Lanjutan. Sebelum mulai, kamu juga bisa pilih <strong>Jalur Belajar</strong> — Lengkap (semua 30 soal), atau fokus ke satu tingkat saja (Fondasi/Menengah/Lanjutan) kalau mau latihan lebih terarah.</li>
+        <li>Ada <strong>40 soal</strong> berupa teori keamanan siber atau potongan kode yang mengandung celah, diurutkan dari tingkat Dasar → Menengah → Lanjutan. Sebelum mulai, kamu juga bisa pilih <strong>Jalur Belajar</strong> — Lengkap (semua 40 soal), atau fokus ke satu tingkat saja (Fondasi/Menengah/Lanjutan) kalau mau latihan lebih terarah.</li>
         <li>Pilih <strong>Mode Belajar</strong> (tanpa batas waktu, ada tombol Petunjuk) jika kamu baru mulai — fokus memahami, bukan mengejar waktu. Pilih <strong>Mode Tantangan</strong> kalau ingin diuji dengan batas waktu per soal. Pilih <strong>Mode Jam Terbang</strong> kalau ingin latihan praktik langsung: menemukan baris kode rentan, mendiagnosis jenisnya, lalu memilih perbaikan yang tepat — tanpa timer.</li>
         <li>Setiap jawaban langsung ditandai <strong>hijau (benar)</strong> atau <strong>merah (salah)</strong>, disertai penjelasan "Kenapa begini" dan "Yang perlu diingat" — bagian ini yang paling penting untuk dipelajari, bukan sekadar skornya.</li>
         <li>Di akhir kuis kamu mendapat skor akhir, tingkat (rank), dan bisa membaca ulang semua penjelasan di bagian Review.</li>
@@ -892,6 +892,33 @@ mysqli_query($conn, $query);</pre>
       why:"Update/patch keamanan dirilis pengembang untuk menambal celah (vulnerability) yang baru ditemukan pada versi sebelumnya, sebelum sempat dieksploitasi secara luas oleh penyerang.",
       takeaway:"Aktifkan update otomatis untuk sistem operasi & aplikasi penting, dan jangan menunda-nunda update yang berlabel keamanan."
     },
+    {
+      type:"theory", difficulty:"dasar",
+      question:"Apa fungsi utama VPN (Virtual Private Network) dari sisi keamanan?",
+      options:["Membuat internet menjadi lebih cepat","Membuat koneksi terenkripsi antara perangkat dan server VPN, menyembunyikan trafik dari jaringan yang dilalui","Menghapus virus dari perangkat secara otomatis","Memblokir semua iklan di browser"],
+      correct:1,
+      hint:"VPN itu soal enkripsi jalur koneksi, bukan soal kecepatan atau antivirus.",
+      why:"VPN membungkus trafik internet dalam terowongan terenkripsi menuju server VPN, sehingga pihak yang berada di jaringan yang sama (misalnya Wi-Fi publik) tidak bisa membaca isi trafik tersebut.",
+      takeaway:"Gunakan VPN dari penyedia tepercaya terutama saat terhubung ke Wi-Fi publik, tapi tetap sadari VPN bukan solusi keamanan tunggal — penyedia VPN itu sendiri bisa melihat trafikmu."
+    },
+    {
+      type:"theory", difficulty:"dasar",
+      question:"Mengapa backup data secara rutin dianggap bagian dari praktik keamanan siber?",
+      options:["Supaya file terlihat lebih rapi","Karena backup mempercepat kinerja perangkat","Supaya data tetap bisa dipulihkan jika terkena ransomware atau kerusakan sistem","Karena backup otomatis mengenkripsi seluruh perangkat"],
+      correct:2,
+      hint:"Bayangkan skenario terburuk: perangkat terkena ransomware yang mengunci semua file — backup adalah jalan keluarnya.",
+      why:"Serangan seperti ransomware mengenkripsi/mengunci data korban dan meminta tebusan. Dengan backup yang rutin dan terpisah dari sistem utama, data bisa dipulihkan tanpa perlu membayar tebusan.",
+      takeaway:"Terapkan strategi backup 3-2-1: minimal 3 salinan data, di 2 media berbeda, dengan 1 salinan disimpan di lokasi terpisah (offline/cloud)."
+    },
+    {
+      type:"theory", difficulty:"dasar",
+      question:"Apa risiko utama mengakses akun penting (email, e-banking) lewat Wi-Fi publik tanpa perlindungan tambahan?",
+      options:["Baterai perangkat akan lebih cepat habis","Trafik data berpotensi disadap oleh pihak lain yang berada di jaringan yang sama","Kecepatan internet akan otomatis dibatasi","Akun akan otomatis logout setelah 5 menit"],
+      correct:1,
+      hint:"Wi-Fi publik dipakai bersama orang tak dikenal — siapa pun di jaringan itu berpotensi ikut 'mendengarkan'.",
+      why:"Di jaringan Wi-Fi publik yang tidak terenkripsi dengan baik, trafik antar perangkat berpotensi disadap oleh pihak lain yang berada di jaringan yang sama (misalnya lewat teknik packet sniffing).",
+      takeaway:"Hindari transaksi sensitif di Wi-Fi publik, atau gunakan VPN tepercaya dan pastikan situs yang diakses memakai HTTPS."
+    },
 
     // ===================== MENENGAH =====================
     {
@@ -1027,6 +1054,50 @@ mysqli_query($conn, $query);</pre>
       why:"Banyak perangkat & aplikasi memakai kredensial default saat pertama dipasang. Jika tidak diganti, penyerang bisa langsung mencobanya dari daftar kredensial default yang sudah dikenal luas — bahkan tanpa perlu brute force sama sekali.",
       takeaway:"Selalu ganti kredensial default segera setelah instalasi, dan wajibkan penggantian password saat setup awal (forced first-login change)."
     },
+    {
+      type:"code", difficulty:"menengah",
+      question:"Jika parser XML berikut mengizinkan resolusi entity eksternal dari xmlInput yang berasal dari pengguna, kerentanan apa yang mengintai?",
+      codeLabel:"xml_parser.js",
+      code:"const parser = new DOMParser();\nconst doc = parser.parseFromString(xmlInput, \"text/xml\");\n// parser mengizinkan resolusi entity eksternal",
+      options:["XML External Entity (XXE) Injection","Cross-Site Scripting (XSS)","Command Injection","Race Condition"],
+      correct:0,
+      hint:"XML punya fitur 'entity' yang bisa dipakai memuat file atau URL eksternal jika tidak dibatasi.",
+      why:"Parser XML yang mengizinkan definisi entity eksternal bisa dimanfaatkan penyerang untuk membaca file lokal server atau melakukan request ke server internal, hanya lewat dokumen XML yang dikirim.",
+      takeaway:"Nonaktifkan resolusi entity eksternal (DTD) pada parser XML secara default — sebagian besar library modern sudah menyediakan opsi ini."
+    },
+    {
+      type:"code", difficulty:"menengah",
+      question:"Apa masalah keamanan pada token reset password berikut?",
+      codeLabel:"reset_password.js",
+      code:"function generateResetToken(userId) {\n  return Buffer.from(userId + ':' + Date.now()).toString('base64');\n}",
+      options:["Token mudah ditebak/direkonstruksi karena hanya berupa encoding dari data yang bisa diprediksi, bukan nilai acak","Fungsi ini berjalan terlalu lambat untuk banyak pengguna","Buffer.from() tidak mendukung karakter Unicode","Token akan selalu sama untuk userId yang berbeda"],
+      correct:0,
+      hint:"base64 itu encoding, bukan enkripsi — dan Date.now() itu bisa ditebak-tebak jika tahu kira-kira kapan request dibuat.",
+      why:"Token ini hanya encoding base64 dari userId dan timestamp — bukan nilai acak yang tidak bisa diprediksi. Penyerang yang tahu userId korban dan perkiraan waktu request bisa merekonstruksi token yang valid.",
+      takeaway:"Gunakan token acak kriptografis (crypto.randomBytes) yang disimpan di database dengan masa berlaku singkat, bukan hasil encoding dari data yang bisa ditebak."
+    },
+    {
+      type:"code", difficulty:"menengah",
+      question:"Kerentanan apa yang muncul dari endpoint redirect berikut?",
+      codeLabel:"redirect.js",
+      code:"app.get('/goto', (req, res) => {\n  res.redirect(req.query.url);\n});",
+      options:["Open Redirect — penyerang bisa membuat link situs ini yang sebenarnya mengarahkan korban ke situs phishing","SQL Injection karena parameter url masuk ke database","Command Injection karena res.redirect menjalankan perintah sistem","Memory leak karena redirect dipanggil berulang"],
+      correct:0,
+      hint:"Bayangkan penyerang mengirim link resmi dari domain ini, tapi parameternya diarahkan ke situs lain.",
+      why:"Karena nilai redirect diambil langsung dari parameter url tanpa validasi, penyerang bisa membuat link seperti situs-ini.com/goto?url=situs-jahat.com — korban melihat domain tepercaya di awal link, lalu diarahkan ke situs phishing.",
+      takeaway:"Validasi tujuan redirect terhadap daftar domain yang diizinkan (allowlist), atau gunakan path relatif internal saja alih-alih URL bebas dari input pengguna."
+    },
+    {
+      type:"code", difficulty:"menengah",
+      question:"Apa risiko keamanan dari baris log berikut?",
+      codeLabel:"auth_service.js",
+      code:"function login(username, password) {\n  console.log('Login attempt:', username, password);\n  // ...\n}",
+      options:["Password pengguna tersimpan dalam bentuk teks biasa di file log, yang bisa dibaca siapa pun dengan akses ke log","console.log membuat aplikasi berjalan lebih lambat","Log akan otomatis terhapus setelah 24 jam","Fungsi login menjadi tidak bisa dipanggil berulang kali"],
+      correct:0,
+      hint:"Semua yang masuk ke console.log biasanya berakhir tersimpan di suatu file log di server.",
+      why:"Password yang dicatat ke log tersimpan sebagai teks biasa, dan file log seringkali punya lebih banyak orang yang bisa mengaksesnya (developer, sistem monitoring, dsb) dibanding database utama — sehingga menjadi titik kebocoran yang mudah luput dari perhatian.",
+      takeaway:"Jangan pernah mencatat data sensitif (password, token, nomor kartu) ke log. Gunakan masking, misalnya hanya mencatat username tanpa passwordnya."
+    },
 
     // ===================== LANJUTAN =====================
     {
@@ -1110,6 +1181,37 @@ mysqli_query($conn, $query);</pre>
       hint:"Bayangkan penyerang menambahkan field ekstra di body request yang sebetulnya tidak ditampilkan di form registrasi biasa.",
       why:"Jika model User punya field seperti role atau isAdmin, dan seluruh req.body diteruskan mentah-mentah ke model, penyerang bisa menambahkan field tersebut secara manual di request (di luar form yang terlihat di UI) untuk langsung mendaftar sebagai admin.",
       takeaway:"Whitelist field yang boleh diisi dari input pengguna secara eksplisit (misalnya hanya name, email, password), jangan pernah meneruskan seluruh body request mentah ke model data."
+    },
+    {
+      type:"code", difficulty:"lanjutan",
+      question:"Jika userInput berisi { \"__proto__\": { \"isAdmin\": true } }, kerentanan apa yang bisa terjadi pada fungsi merge berikut?",
+      codeLabel:"merge_config.js",
+      code:"function merge(target, source) {\n  for (const key in source) {\n    target[key] = source[key];\n  }\n  return target;\n}\nmerge({}, JSON.parse(userInput));",
+      options:["Prototype Pollution — properti bisa disuntikkan ke Object.prototype dan memengaruhi seluruh objek di aplikasi","SQL Injection karena JSON.parse terhubung ke database","Buffer Overflow karena objek terlalu besar","CSRF karena fungsi merge dipanggil dari luar domain"],
+      correct:0,
+      hint:"Kunci __proto__ itu istimewa di JavaScript — dia bukan properti biasa, tapi merujuk ke prototype objek itu sendiri.",
+      why:"Karena loop menyalin key apa pun tanpa pengecualian, key __proto__ akan menimpa Object.prototype itu sendiri — akibatnya semua objek JavaScript di aplikasi bisa mendadak punya properti isAdmin:true, yang berpotensi dipakai melewati pengecekan otorisasi di bagian kode lain.",
+      takeaway:"Validasi/filter key berbahaya seperti __proto__, constructor, dan prototype sebelum melakukan merge objek dari input pengguna."
+    },
+    {
+      type:"code", difficulty:"lanjutan",
+      question:"Jika req.body.password bisa berisi objek seperti { \"$ne\": null } alih-alih string biasa, kerentanan apa yang muncul pada query berikut?",
+      codeLabel:"login_mongo.js",
+      code:"db.users.findOne({\n  username: req.body.username,\n  password: req.body.password\n});",
+      options:["NoSQL Injection — operator query MongoDB bisa disuntikkan lewat body JSON untuk melewati pengecekan password","SQL Injection karena MongoDB menggunakan bahasa SQL","XSS karena hasil query dirender langsung ke HTML","Insecure Deserialization karena objek JSON terlalu kompleks"],
+      correct:0,
+      hint:"MongoDB menerima query dalam bentuk objek JavaScript — kalau body request diteruskan mentah-mentah, penyerang bisa mengirim objek berisi operator MongoDB, bukan sekadar string.",
+      why:"Alih-alih mengirim password sebagai string biasa, penyerang mengirim objek { \"$ne\": null } yang berarti 'password tidak sama dengan null' — kondisi ini hampir selalu benar, sehingga login berhasil tanpa tahu password aslinya.",
+      takeaway:"Validasi tipe data input secara ketat (pastikan username/password memang berupa string sebelum dipakai di query), dan pertimbangkan library sanitasi khusus NoSQL."
+    },
+    {
+      type:"theory", difficulty:"lanjutan",
+      question:"Apa yang dimaksud dengan web cache poisoning?",
+      options:["Menyisipkan response berbahaya ke dalam cache server, sehingga pengguna lain yang meminta halaman yang sama ikut menerima response beracun itu","Serangan yang merusak fisik server cache","Teknik mengenkripsi seluruh isi cache browser","Memenuhi cache server dengan data sampah agar server menjadi lambat"],
+      correct:0,
+      hint:"'Poisoning' di sini berarti meracuni isi yang tersimpan di cache, bukan menyerang perangkat kerasnya.",
+      why:"Penyerang memanfaatkan bagian request yang tidak ikut menentukan cache key (misalnya header tertentu) untuk membuat server menyimpan response berbahaya di cache — response beracun itu lalu disajikan ke semua pengguna lain yang mengakses URL yang sama, tanpa mereka melakukan apa pun yang mencurigakan.",
+      takeaway:"Konfigurasikan cache key mencakup semua bagian request yang memengaruhi response, dan validasi/batasi header yang bisa memengaruhi output halaman sebelum di-cache."
     }
   ];
 
@@ -1359,6 +1461,130 @@ mysqli_query($conn, $query);</pre>
       simPayload:"{ name: \"eve\", email: \"eve@mail.com\", password: \"123\", role: \"admin\" }",
       simBefore:"Field role:\"admin\" ikut tersimpan apa adanya — akun baru langsung punya hak akses admin penuh sejak pertama mendaftar.",
       simAfter:"Hanya name, email, dan password yang diambil dari body — field role diabaikan sepenuhnya, akun baru dibuat dengan hak akses default biasa."
+    },
+    {
+      category:"Open Redirect",
+      codeLabel:"redirect.js",
+      lines:[
+        "app.get('/goto', (req, res) => {",
+        "  res.redirect(req.query.url);",
+        "});"
+      ],
+      vulnLines:[1],
+      attackerNote:"Penyerang mencari endpoint redirect yang menerima URL tujuan dari parameter, lalu membungkusnya jadi link resmi dari domain tepercaya — korban cenderung percaya karena domain awalnya benar, padahal ujungnya diarahkan ke situs phishing.",
+      diagOptions:["Open Redirect","SQL Injection","Command Injection","Memory Leak"],
+      diagCorrect:0,
+      diagWhy:"Nilai redirect diambil langsung dari parameter url tanpa validasi, sehingga tujuan redirect bisa diarahkan ke domain mana pun oleh penyerang.",
+      fixOptions:[
+        "res.redirect(req.query.url.toLowerCase());",
+        "const allowed = ['/dashboard','/profile']; res.redirect(allowed.includes(req.query.url) ? req.query.url : '/');",
+        "res.redirect(req.query.url.replace('http://',''));"
+      ],
+      fixCorrect:1,
+      fixWhy:"Membatasi tujuan redirect hanya ke daftar path internal yang diizinkan (allowlist) memastikan endpoint ini tidak bisa dipakai mengarahkan pengguna ke domain luar mana pun.",
+      simPayload:"situs-ini.com/goto?url=situs-jahat-phishing.com",
+      simBefore:"Server langsung mengarahkan browser korban ke situs-jahat-phishing.com — korban sempat melihat domain tepercaya di link awal sehingga lebih mudah percaya dan mengikuti redirect tersebut.",
+      simAfter:"Karena situs-jahat-phishing.com tidak ada dalam daftar path yang diizinkan, server mengarahkan kembali ke halaman utama ('/') alih-alih ke situs luar."
+    },
+    {
+      category:"NoSQL Injection",
+      codeLabel:"login_mongo.js",
+      lines:[
+        "db.users.findOne({",
+        "  username: req.body.username,",
+        "  password: req.body.password",
+        "});"
+      ],
+      vulnLines:[1,2],
+      attackerNote:"Penyerang mencoba mengirim body JSON berisi operator query (seperti $ne atau $gt) alih-alih string biasa, untuk melihat apakah aplikasi memprosesnya sebagai bagian dari query database, bukan sebagai nilai literal.",
+      diagOptions:["NoSQL Injection","SQL Injection","Cross-Site Scripting (XSS)","Insecure Deserialization"],
+      diagCorrect:0,
+      diagWhy:"Nilai dari req.body diteruskan mentah-mentah sebagai bagian dari query MongoDB. Jika value-nya berupa objek berisi operator MongoDB, itu akan diproses sebagai operator, bukan nilai biasa.",
+      fixOptions:[
+        "db.users.findOne({ username: req.body.username, password: req.body.password.trim() });",
+        "if (typeof req.body.username !== 'string' || typeof req.body.password !== 'string') return res.status(400).end(); db.users.findOne({ username: req.body.username, password: req.body.password });",
+        "db.users.findOne({ username: String(req.body.username).toLowerCase(), password: req.body.password });"
+      ],
+      fixCorrect:1,
+      fixWhy:"Memvalidasi bahwa username dan password memang bertipe string sebelum dipakai di query mencegah penyerang menyelipkan objek berisi operator MongoDB seperti $ne, karena request dengan tipe data yang salah langsung ditolak.",
+      simPayload:"{ username: \"admin\", password: { \"$ne\": null } }",
+      simBefore:"MongoDB membaca $ne:null sebagai 'password tidak sama dengan null' — kondisi ini hampir selalu benar, sehingga login berhasil sebagai admin tanpa tahu password aslinya.",
+      simAfter:"Validasi tipe data menolak request karena password yang dikirim bukan string melainkan objek — login gagal sebelum sempat menyentuh query database."
+    },
+    {
+      category:"Predictable Reset Token",
+      codeLabel:"reset_password.js",
+      lines:[
+        "function generateResetToken(userId) {",
+        "  return Buffer.from(userId + ':' + Date.now()).toString('base64');",
+        "}"
+      ],
+      vulnLines:[1],
+      attackerNote:"Penyerang mencoba mendekode token reset yang pernah terlihat (base64 mudah dikenali polanya), lalu menganalisis apakah isinya berupa data yang bisa ditebak seperti ID pengguna dan waktu, bukan nilai acak.",
+      diagOptions:["Predictable Reset Token","SQL Injection","Command Injection","Clickjacking"],
+      diagCorrect:0,
+      diagWhy:"Token hanya berupa encoding base64 dari userId dan timestamp — bukan nilai acak. Base64 mudah didekode, dan timestamp bisa ditebak dalam rentang waktu tertentu.",
+      fixOptions:[
+        "return Buffer.from(userId + ':' + Date.now()).toString('hex');",
+        "const token = crypto.randomBytes(32).toString('hex'); saveResetToken(userId, token, { expiresIn: '15m' }); return token;",
+        "return Buffer.from(userId + ':' + Date.now() + ':secret').toString('base64');"
+      ],
+      fixCorrect:1,
+      fixWhy:"Token acak kriptografis (crypto.randomBytes) yang disimpan di database dan diberi masa berlaku singkat tidak bisa direkonstruksi dari data yang diketahui penyerang, berbeda dengan encoding sederhana dari data yang bisa ditebak.",
+      simPayload:"Merekonstruksi token dari userId korban + perkiraan waktu request",
+      simBefore:"Karena token hanya base64 dari data yang bisa ditebak, penyerang berhasil membuat ulang token yang valid dan mereset password akun korban tanpa akses ke emailnya.",
+      simAfter:"Token acak 32-byte tidak punya pola yang bisa direkonstruksi dari userId atau waktu — penyerang tidak punya cara praktis menebak token yang valid."
+    },
+    {
+      category:"Prototype Pollution",
+      codeLabel:"merge_config.js",
+      lines:[
+        "function merge(target, source) {",
+        "  for (const key in source) {",
+        "    target[key] = source[key];",
+        "  }",
+        "  return target;",
+        "}",
+        "merge({}, JSON.parse(userInput));"
+      ],
+      vulnLines:[2],
+      attackerNote:"Penyerang mengirim JSON berisi key __proto__ pada input yang diketahui akan digabung (merge) ke sebuah objek, untuk melihat apakah nilai itu ikut menimpa prototype bawaan JavaScript.",
+      diagOptions:["Prototype Pollution","Buffer Overflow","SQL Injection","CSRF"],
+      diagCorrect:0,
+      diagWhy:"Loop menyalin key apa pun dari source tanpa pengecualian. Key __proto__ merujuk ke prototype objek itu sendiri, sehingga nilai yang disuntikkan di sana ikut menimpa Object.prototype secara global.",
+      fixOptions:[
+        "for (const key in source) { if (typeof source[key] !== 'object') target[key] = source[key]; }",
+        "for (const key in source) { if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue; target[key] = source[key]; }",
+        "for (const key in source) { target[key.toLowerCase()] = source[key]; }"
+      ],
+      fixCorrect:1,
+      fixWhy:"Secara eksplisit melewati key berbahaya seperti __proto__, constructor, dan prototype mencegah proses merge menyentuh prototype objek JavaScript, apa pun isi source-nya.",
+      simPayload:"{ \"__proto__\": { \"isAdmin\": true } }",
+      simBefore:"Object.prototype tertimpa properti isAdmin:true — akibatnya semua objek di aplikasi (termasuk objek user lain yang tidak terkait) mendadak dianggap admin oleh kode yang mengecek user.isAdmin.",
+      simAfter:"Key __proto__ dilewati begitu saja oleh proses merge — Object.prototype tidak pernah tersentuh, objek lain di aplikasi tetap normal."
+    },
+    {
+      category:"XML External Entity (XXE)",
+      codeLabel:"xml_parser.js",
+      lines:[
+        "const parser = new XMLParser({ allowExternalEntities: true });",
+        "const doc = parser.parse(xmlInput);"
+      ],
+      vulnLines:[0],
+      attackerNote:"Penyerang mengirim dokumen XML berisi definisi entity eksternal yang menunjuk ke file lokal server atau URL internal, lalu memeriksa apakah isinya ikut ditampilkan kembali di response.",
+      diagOptions:["XML External Entity (XXE) Injection","Cross-Site Scripting (XSS)","Path Traversal","Server-Side Request Forgery (SSRF)"],
+      diagCorrect:0,
+      diagWhy:"Parser dikonfigurasi mengizinkan resolusi entity eksternal (allowExternalEntities:true) pada input XML yang berasal dari pengguna, sehingga entity yang menunjuk ke file lokal atau URL internal akan ikut diproses.",
+      fixOptions:[
+        "const parser = new XMLParser({ allowExternalEntities: true, timeout: 1000 });",
+        "const parser = new XMLParser({ allowExternalEntities: false });",
+        "const parser = new XMLParser({ allowExternalEntities: true, encoding: 'utf-8' });"
+      ],
+      fixCorrect:1,
+      fixWhy:"Menonaktifkan resolusi entity eksternal memastikan parser tidak akan pernah memuat file lokal atau melakukan request ke URL yang didefinisikan di dalam dokumen XML, apa pun entity yang dikirim.",
+      simPayload:"<!DOCTYPE foo [ <!ENTITY x SYSTEM \"file:///etc/passwd\"> ]><foo>&x;</foo>",
+      simBefore:"Parser mencoba membaca file lokal server sesuai definisi entity, dan isinya ikut termuat ke dalam hasil parsing yang bisa terbawa ke response.",
+      simAfter:"Parser menolak memproses entity eksternal sama sekali — definisi ENTITY dalam dokumen diabaikan, tidak ada file lokal yang terbaca."
     }
   ];
 
